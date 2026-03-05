@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <!-- Metallic gradient for arm segments -->
+    <linearGradient id="metal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E8E8E8"/>
+      <stop offset="30%" stop-color="#F5F5F5"/>
+      <stop offset="50%" stop-color="#D8D8D8"/>
+      <stop offset="70%" stop-color="#F0F0F0"/>
+      <stop offset="100%" stop-color="#C8C8C8"/>
+    </linearGradient>
+    <linearGradient id="metalDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D0D0D0"/>
+      <stop offset="40%" stop-color="#E8E8E8"/>
+      <stop offset="60%" stop-color="#B8B8B8"/>
+      <stop offset="100%" stop-color="#A8A8A8"/>
+    </linearGradient>
+    <linearGradient id="metalBase" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E0E0E0"/>
+      <stop offset="50%" stop-color="#D0D0D0"/>
+      <stop offset="100%" stop-color="#B0B0B0"/>
+    </linearGradient>
+    <!-- Shadow for depth -->
+    <filter id="shadow" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="2" dy="3" stdDeviation="4" flood-color="#00000030"/>
+    </filter>
+    <filter id="innerShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="#00000020"/>
+    </filter>
+  </defs>
+
+  <!-- ===== ORANGE "R" LETTER (background) ===== -->
+  <!-- Main R body: vertical left stroke -->
+  <path d="M100 80 L100 430 L175 430 L175 295 L175 80 Z" fill="#FD3E06"/>
+  <!-- R bump/bowl (top right curve) -->
+  <path d="M175 80 L280 80 Q360 80 360 165 Q360 250 280 250 L175 250 L175 80Z" fill="#FD3E06"/>
+  <!-- R leg (lower right diagonal) -->
+  <path d="M235 250 L380 430 L295 430 L175 280 L175 250 Z" fill="#FD3E06"/>
+  <!-- Shadow line on R for depth -->
+  <path d="M175 80 L175 430" stroke="#E03000" stroke-width="3" opacity="0.3"/>
+
+  <!-- ===== ROBOT ARM ===== -->
+
+  <!-- == BASE (bottom, trapezoid pedestal) == -->
+  <path d="M105 405 Q105 395 115 390 L195 390 Q205 395 205 405 L205 415 Q205 425 195 425 L115 425 Q105 425 105 415 Z" fill="url(#metalBase)" stroke="#B0B0B0" stroke-width="1.5" filter="url(#shadow)"/>
+  <!-- Base bottom flange -->
+  <path d="M95 425 L215 425 L220 440 L90 440 Z" fill="#D5D5D5" stroke="#B0B0B0" stroke-width="1"/>
+  <!-- Base detail lines -->
+  <path d="M120 400 L190 400" stroke="#A0A0A0" stroke-width="1" opacity="0.5"/>
+  <path d="M115 410 L195 410" stroke="#A0A0A0" stroke-width="1" opacity="0.5"/>
+  <!-- Triangular detail on base -->
+  <polygon points="140,395 155,405 170,395" fill="#B8B8B8" opacity="0.6"/>
+
+  <!-- == LOWER ARM SEGMENT (vertical, from base to elbow) == -->
+  <rect x="130" y="280" width="50" height="110" rx="8" fill="url(#metal)" stroke="#B0B0B0" stroke-width="1.5" filter="url(#innerShadow)"/>
+  <!-- Highlight stripe on lower arm -->
+  <rect x="148" y="285" width="12" height="100" rx="3" fill="white" opacity="0.25"/>
+  <!-- Edge shadow on lower arm -->
+  <rect x="130" y="280" width="8" height="110" rx="4" fill="#C0C0C0" opacity="0.4"/>
+
+  <!-- == LOWER JOINT (elbow - circle at base/lower arm junction) == -->
+  <circle cx="155" cy="290" r="32" fill="#FD3E06" filter="url(#shadow)"/>
+  <circle cx="155" cy="290" r="24" fill="white"/>
+  <circle cx="155" cy="290" r="18" fill="#FD3E06"/>
+  <circle cx="155" cy="290" r="10" fill="white" opacity="0.4"/>
+  <!-- Joint highlight -->
+  <circle cx="148" cy="283" r="5" fill="white" opacity="0.5"/>
+
+  <!-- == UPPER ARM SEGMENT (angled, from elbow to upper joint) == -->
+  <g transform="rotate(-45 155 290)">
+    <rect x="130" y="170" width="50" height="120" rx="8" fill="url(#metal)" stroke="#B0B0B0" stroke-width="1.5" filter="url(#innerShadow)"/>
+    <!-- Highlight stripe -->
+    <rect x="148" y="175" width="12" height="110" rx="3" fill="white" opacity="0.25"/>
+    <!-- Edge shadow -->
+    <rect x="130" y="170" width="8" height="120" rx="4" fill="#C0C0C0" opacity="0.4"/>
+  </g>
+
+  <!-- == UPPER JOINT (circle at top of upper arm) == -->
+  <circle cx="240" cy="200" r="30" fill="#FD3E06" filter="url(#shadow)"/>
+  <circle cx="240" cy="200" r="22" fill="white"/>
+  <circle cx="240" cy="200" r="16" fill="#FD3E06"/>
+  <circle cx="240" cy="200" r="8" fill="white" opacity="0.4"/>
+  <!-- Joint highlight -->
+  <circle cx="234" cy="194" r="4" fill="white" opacity="0.5"/>
+
+  <!-- == END EFFECTOR / WRIST SEGMENT (angled up-right) == -->
+  <g transform="rotate(-55 240 200)">
+    <rect x="215" y="110" width="50" height="90" rx="8" fill="url(#metal)" stroke="#B0B0B0" stroke-width="1.5" filter="url(#innerShadow)"/>
+    <!-- Highlight stripe -->
+    <rect x="233" y="115" width="12" height="80" rx="3" fill="white" opacity="0.25"/>
+  </g>
+
+  <!-- == TOOL HEAD (cylindrical end effector at top) == -->
+  <g filter="url(#shadow)">
+    <!-- Tool cylinder body -->
+    <rect x="290" y="72" width="65" height="42" rx="10" transform="rotate(-20 322 93)" fill="url(#metalDark)" stroke="#A0A0A0" stroke-width="1.5"/>
+    <!-- Tool ring -->
+    <rect x="285" y="78" width="12" height="30" rx="4" transform="rotate(-20 291 93)" fill="#D0D0D0" stroke="#A0A0A0" stroke-width="1"/>
+    <!-- Tool tip highlight -->
+    <rect x="340" y="64" width="18" height="36" rx="6" transform="rotate(-20 349 82)" fill="#E8E8E8" stroke="#B0B0B0" stroke-width="1"/>
+    <!-- Orange ring on tool -->
+    <rect x="330" y="70" width="6" height="32" rx="2" transform="rotate(-20 333 86)" fill="#FD3E06" opacity="0.8"/>
+  </g>
+</svg>
