@@ -408,6 +408,8 @@ function WebGLFallback({ robots }: { robots: RobotData[] }) {
 
 export function FactoryScene({ robots, selectedRobotId, onSelectRobot }: FactorySceneProps) {
   const [webglSupported, setWebglSupported] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState<{ w: number; h: number } | null>(null);
 
   useEffect(() => {
     try {
@@ -417,6 +419,20 @@ export function FactoryScene({ robots, selectedRobotId, onSelectRobot }: Factory
     } catch {
       setWebglSupported(false);
     }
+  }, []);
+
+  // Track container size so Canvas knows to resize on mobile
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      const rect = entries[0].contentRect;
+      setSize({ w: rect.width, h: rect.height });
+    });
+    ro.observe(el);
+    // initial
+    setSize({ w: el.clientWidth, h: el.clientHeight });
+    return () => ro.disconnect();
   }, []);
 
   const selectedRobot = robots.find((r) => r.id === selectedRobotId);
@@ -430,7 +446,11 @@ export function FactoryScene({ robots, selectedRobotId, onSelectRobot }: Factory
   }
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-lg border border-[#1E293B] bg-[#0B0F17]">
+    <div
+      ref={containerRef}
+      className="relative h-full w-full overflow-hidden rounded-lg border border-[#1E293B] bg-[#0B0F17]"
+      style={{ touchAction: "none" }}
+    >
       {/* ── Top-left: Scene title ── */}
       <div className="pointer-events-none absolute left-3 top-3 z-10">
         <div className="rounded border border-[#1E293B] bg-[#0F172A]/90 px-2.5 py-1 backdrop-blur-sm">
@@ -501,9 +521,15 @@ export function FactoryScene({ robots, selectedRobotId, onSelectRobot }: Factory
 
       <Canvas
         camera={{ position: [8, 6, 8], fov: 50 }}
-        dpr={[1, 2]}
-        gl={{ antialias: true, alpha: false, powerPreference: "high-performance", failIfMajorPerformanceCaveat: false }}
-        style={{ background: "#0B0F17", width: "100%", height: "100%" }}
+        dpr={[1, Math.min(1.5, window?.devicePixelRatio ?? 1)]}
+        gl={{
+          antialias: true,
+          alpha: false,
+          powerPreference: "default",
+          failIfMajorPerformanceCaveat: false,
+        }}
+        style={{ background: "#0B0F17", width: "100%", height: "100%", display: "block" }}
+        resize={{ debounce: 50 }}
         onCreated={({ gl, scene }) => {
           gl.setClearColor(0x0b0f17, 1);
           scene.background = new THREE.Color(0x0b0f17);

@@ -13,6 +13,8 @@ import {
   Plus,
   Pencil,
   Trash2,
+  Lock,
+  ExternalLink,
 } from "lucide-react";
 
 interface RobotPanelProps {
@@ -22,28 +24,69 @@ interface RobotPanelProps {
   onAddRobot?: () => void;
   onEditRobot?: (robot: RobotData) => void;
   onDeleteRobot?: (id: string) => void;
+  /** -1 = unlimited */
+  robotLimit?: number;
+  atLimit?: boolean;
 }
 
-export function RobotPanel({ robots, selectedRobotId, onSelectRobot, onAddRobot, onEditRobot, onDeleteRobot }: RobotPanelProps) {
+export function RobotPanel({ robots, selectedRobotId, onSelectRobot, onAddRobot, onEditRobot, onDeleteRobot, robotLimit = -1, atLimit = false }: RobotPanelProps) {
   const selectedRobot = robots.find((r) => r.id === selectedRobotId);
 
   return (
     <aside className="flex h-full w-72 flex-col border-l border-[#E2E8F0] bg-white">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-[#E2E8F0] px-4 py-3">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">
-          Robot Status
-        </h2>
+        <div>
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">
+            Robot Status
+          </h2>
+          {robotLimit !== -1 && (
+            <p className="mt-0.5 text-[10px] text-[#94A3B8]">
+              {robots.length} / {robotLimit} robots
+            </p>
+          )}
+        </div>
         {onAddRobot && (
           <button
-            onClick={onAddRobot}
-            className="flex items-center gap-1 rounded-md bg-[#FD3E06] px-2 py-1 text-[10px] font-medium text-white transition-colors hover:bg-[#FD3E06]/90"
+            onClick={atLimit ? undefined : onAddRobot}
+            disabled={atLimit}
+            title={atLimit ? `Limit of ${robotLimit} robots reached — upgrade to add more` : "Add robot"}
+            className={cn(
+              "flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-medium text-white transition-colors",
+              atLimit
+                ? "cursor-not-allowed bg-[#94A3B8]"
+                : "bg-[#FD3E06] hover:bg-[#FD3E06]/90"
+            )}
           >
-            <Plus className="h-3 w-3" />
+            {atLimit ? <Lock className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
             Add
           </button>
         )}
       </div>
+
+      {/* Upgrade banner when at limit */}
+      {atLimit && (
+        <div className="mx-3 mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
+          <div className="flex items-start gap-2">
+            <Lock className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-amber-500" />
+            <div>
+              <p className="text-[11px] font-semibold text-amber-700">
+                Giới hạn {robotLimit} robot
+              </p>
+              <p className="mt-0.5 text-[10px] text-amber-600">
+                Nâng cấp lên Enterprise để không giới hạn.
+              </p>
+              <a
+                href="/pricing"
+                className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold text-[#FD3E06] hover:underline"
+              >
+                Xem gói nâng cấp
+                <ExternalLink className="h-2.5 w-2.5" />
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Robot List */}
       <div className="flex-1 overflow-y-auto p-3">
@@ -161,8 +204,8 @@ export function RobotPanel({ robots, selectedRobotId, onSelectRobot, onAddRobot,
                       selectedRobot.load > 90
                         ? "#ef4444"
                         : selectedRobot.load > 70
-                        ? "#eab308"
-                        : "#22c55e",
+                          ? "#eab308"
+                          : "#22c55e",
                   }}
                 />
               </div>
@@ -183,8 +226,8 @@ export function RobotPanel({ robots, selectedRobotId, onSelectRobot, onAddRobot,
                       selectedRobot.temperature > 60
                         ? "#ef4444"
                         : selectedRobot.temperature > 45
-                        ? "#eab308"
-                        : "#22c55e",
+                          ? "#eab308"
+                          : "#22c55e",
                   }}
                 />
               </div>

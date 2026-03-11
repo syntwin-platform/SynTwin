@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React from "react";
 import Image from "next/image";
 import {
   Bot,
@@ -10,8 +9,6 @@ import {
   BarChart3,
   Zap,
   ArrowRight,
-  Eye,
-  EyeOff,
   ChevronDown,
   Github,
   Activity,
@@ -41,12 +38,15 @@ export default function LandingPage() {
             <a href="#how-it-works" className="text-sm text-[#64748B] transition-colors hover:text-[#0F172A]">
               How It Works
             </a>
-            <a href="#login" className="text-sm text-[#64748B] transition-colors hover:text-[#0F172A]">
+            <a href="/login" className="text-sm text-[#64748B] transition-colors hover:text-[#0F172A]">
               Login
+            </a>
+            <a href="/register" className="text-sm text-[#64748B] transition-colors hover:text-[#0F172A]">
+              Register
             </a>
           </div>
           <a
-            href="#login"
+            href="/login"
             className="rounded-lg bg-[#FD3E06] px-4 py-2 text-sm font-medium text-white transition-all hover:bg-[#E63600]"
           >
             Get Started
@@ -75,7 +75,7 @@ export default function LandingPage() {
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <a
-              href="#login"
+              href="/login"
               className="group flex items-center gap-2 rounded-xl bg-[#FD3E06] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#FD3E06]/20 transition-all hover:bg-[#E63600] hover:shadow-[#FD3E06]/30"
             >
               Enter Dashboard
@@ -212,10 +212,31 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Login Section */}
-      <section id="login" className="relative z-10 border-t border-[#E2E8F0] bg-white py-24">
-        <div className="mx-auto max-w-md px-6">
-          <LoginCard />
+      {/* CTA */}
+      <section className="relative z-10 border-t border-[#E2E8F0] bg-white py-20">
+        <div className="mx-auto max-w-2xl px-6 text-center">
+          <h2 className="text-3xl font-bold text-[#0F172A] sm:text-4xl">
+            Ready to digitize your factory?
+          </h2>
+          <p className="mx-auto mt-4 max-w-lg text-sm text-[#64748B]">
+            Join leading manufacturers already using SynTwin to cut downtime and boost
+            throughput with real-time Digital Twin technology.
+          </p>
+          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+            <a
+              href="/register"
+              className="group flex items-center gap-2 rounded-xl bg-[#FD3E06] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#FD3E06]/20 transition-all hover:bg-[#E63600]"
+            >
+              Create Free Account
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </a>
+            <a
+              href="/login"
+              className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-6 py-3 text-sm font-medium text-[#334155] transition-all hover:border-[#FD3E06]/30 hover:shadow-md"
+            >
+              Sign In
+            </a>
+          </div>
         </div>
       </section>
 
@@ -241,127 +262,6 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Login Card                                                         */
-/* ------------------------------------------------------------------ */
-function LoginCard() {
-  const router = useRouter();
-  const [email, setEmail] = useState("operator@syntwin.io");
-  const [password, setPassword] = useState("password");
-  const [showPw, setShowPw] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-
-    if (!email || !password) {
-      setError("Please fill in all fields.");
-      return;
-    }
-
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      router.push("/dashboard");
-    }, 1200);
-  }
-
-  return (
-    <div className="rounded-2xl border border-[#E2E8F0] bg-white p-8 shadow-xl shadow-black/5">
-      <div className="mb-6 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FD3E06]/10">
-          <Image src="/images/syntwin-logo.png" alt="SynTwin" width={28} height={28} />
-        </div>
-        <h2 className="text-xl font-bold text-[#0F172A]">Welcome Back</h2>
-        <p className="mt-1 text-sm text-[#64748B]">
-          Sign in to access the SynTwin dashboard
-        </p>
-      </div>
-
-      {error && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-600">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-[#334155]">
-            Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@company.com"
-            className="h-10 w-full rounded-lg border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] placeholder:text-[#94A3B8] outline-none transition-colors focus:border-[#FD3E06] focus:ring-2 focus:ring-[#FD3E06]/10"
-          />
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-[#334155]">
-            Password
-          </label>
-          <div className="relative">
-            <input
-              type={showPw ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="h-10 w-full rounded-lg border border-[#E2E8F0] bg-white px-3 pr-10 text-sm text-[#0F172A] placeholder:text-[#94A3B8] outline-none transition-colors focus:border-[#FD3E06] focus:ring-2 focus:ring-[#FD3E06]/10"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPw(!showPw)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#334155]"
-            >
-              {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 text-xs text-[#64748B]">
-            <input
-              type="checkbox"
-              defaultChecked
-              className="h-3.5 w-3.5 rounded border-[#E2E8F0] accent-[#FD3E06]"
-            />
-            Remember me
-          </label>
-          <a href="#" className="text-xs text-[#FD3E06] hover:text-[#E63600]">
-            Forgot password?
-          </a>
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#FD3E06] text-sm font-semibold text-white shadow-lg shadow-[#FD3E06]/20 transition-all hover:bg-[#E63600] disabled:opacity-60"
-        >
-          {loading ? (
-            <>
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-              Signing in…
-            </>
-          ) : (
-            <>
-              Sign In
-              <ArrowRight className="h-4 w-4" />
-            </>
-          )}
-        </button>
-      </form>
-
-      <p className="mt-6 text-center text-xs text-[#94A3B8]">
-        Demo credentials are pre-filled — just click Sign In.
-      </p>
     </div>
   );
 }
