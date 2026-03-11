@@ -165,11 +165,16 @@ export default function AlertsPage() {
     if (!session) return null;
 
     return (
-        <div className="flex h-screen w-screen overflow-hidden bg-[#F1F5F9]">
-            <Sidebar />
+        <div className="flex bg-[#F1F5F9] w-screen h-[100dvh] overflow-hidden">
+            {/* ── DESKTOP: Sidebar (hidden on mobile) ── */}
+            <div className="hidden sm:flex">
+                <Sidebar />
+            </div>
+
+            {/* ── MAIN ── */}
             <div className="flex flex-1 flex-col overflow-hidden">
                 <DashboardHeader session={session} onLogout={handleLogout} />
-                <div className="flex flex-1 overflow-hidden">
+                <div className="flex flex-1 flex-col sm:flex-row overflow-hidden pb-14 sm:pb-0">
 
                     {/* Log list */}
                     <div className={cn("flex flex-col overflow-hidden transition-all", selected ? "w-[420px] shrink-0" : "flex-1")}>
@@ -333,6 +338,9 @@ export default function AlertsPage() {
                     })()}
                 </div>
             </div>
+
+            {/* ── MOBILE: Bottom Navigation ── */}
+            <MobileBottomNav />
         </div>
     );
 }

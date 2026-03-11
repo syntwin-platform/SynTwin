@@ -192,7 +192,7 @@ export default function DashboardPage() {
             ──────────────────────────────────────────────── */}
         <div className="flex flex-1 flex-col overflow-y-auto sm:hidden">
           {/* 3D Scene */}
-          <div style={{ height: "45vw", minHeight: 200, maxHeight: 340 }} className="w-full shrink-0 p-2">
+          <div className="flex-1 min-h-[300px] w-full p-2">
             <FactoryScene
               robots={robots}
               selectedRobotId={selectedRobotId}
@@ -265,12 +265,14 @@ export default function DashboardPage() {
           </div>
 
           {/* Alert log (single panel) */}
-          <div className="shrink-0 border-t border-[#E2E8F0] bg-white" style={{ minHeight: 200 }}>
-            <AlertPanel
-              alerts={alerts}
-              title={selectedRobotId ? `Event Log — ${selectedRobotId}` : "All Events"}
-              selectedRobotId={selectedRobotId ?? undefined}
-            />
+          <div className="shrink-0 border-t border-[#E2E8F0] bg-white">
+            <div className="h-64 max-h-[50vh]">
+              <AlertPanel
+                alerts={alerts}
+                title={selectedRobotId ? `Event Log — ${selectedRobotId}` : "All Events"}
+                selectedRobotId={selectedRobotId ?? undefined}
+              />
+            </div>
           </div>
 
           {/* Bottom padding for mobile bar */}

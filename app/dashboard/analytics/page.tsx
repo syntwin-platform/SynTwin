@@ -114,11 +114,16 @@ export default function AnalyticsPage() {
     if (!session) return null;
 
     return (
-        <div className="flex h-screen w-screen overflow-hidden bg-[#F1F5F9]">
-            <Sidebar />
+        <div className="flex bg-[#F1F5F9] w-screen h-[100dvh] overflow-hidden">
+            {/* ── DESKTOP: Sidebar (hidden on mobile) ── */}
+            <div className="hidden sm:flex">
+                <Sidebar />
+            </div>
+
+            {/* ── MAIN ── */}
             <div className="flex flex-1 flex-col overflow-hidden">
                 <DashboardHeader session={session} onLogout={handleLogout} />
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 sm:pb-6">
 
                     {/* Header */}
                     <div className="mb-6 flex items-start justify-between">
@@ -201,7 +206,7 @@ export default function AnalyticsPage() {
                                 <h2 className="text-sm font-semibold text-[#0F172A]">Fleet Comparison</h2>
                                 <span className="text-[11px] text-[#94A3B8]">— All robots side by side</span>
                             </div>
-                            <div className="grid grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                                 {analyticsData.map((r, i) => (
                                     <div key={r.id}>
                                         <div className="mb-3 flex items-center gap-2">
@@ -247,6 +252,9 @@ export default function AnalyticsPage() {
 
                 </div>
             </div>
+
+            {/* ── MOBILE: Bottom Navigation ── */}
+            <MobileBottomNav />
         </div>
     );
 }

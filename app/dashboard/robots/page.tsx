@@ -121,11 +121,16 @@ export default function RobotManagementPage() {
     if (!session) return null;
 
     return (
-        <div className="flex h-screen w-screen overflow-hidden bg-[#F1F5F9]">
-            <Sidebar />
+        <div className="flex bg-[#F1F5F9] w-screen h-[100dvh] overflow-hidden">
+            {/* ── DESKTOP: Sidebar (hidden on mobile) ── */}
+            <div className="hidden sm:flex">
+                <Sidebar />
+            </div>
+
+            {/* ── MAIN ── */}
             <div className="flex flex-1 flex-col overflow-hidden">
                 <DashboardHeader session={session} onLogout={handleLogout} />
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 sm:pb-6">
 
                     {/* Page title */}
                     <div className="mb-6">
@@ -292,6 +297,9 @@ export default function RobotManagementPage() {
 
                 </div>
             </div>
+
+            {/* ── MOBILE: Bottom Navigation ── */}
+            <MobileBottomNav />
         </div>
     );
 }
