@@ -7,6 +7,7 @@ import { DashboardHeader } from "@/components/DashboardHeader";
 import { getSession, clearSession, type Session } from "@/lib/auth";
 import { initialRobots } from "@/lib/mock-data";
 import { Activity, Clock, TrendingUp, Zap, BarChart3, Bot } from "lucide-react";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 /* ─── Mock analytics data per robot ──────────────────────────── */
 interface RobotAnalytics {

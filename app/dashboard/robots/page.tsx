@@ -6,6 +6,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { getSession, PLANS, clearSession, type Session } from "@/lib/auth";
 import { initialRobots, type RobotData } from "@/lib/mock-data";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import {
     Thermometer, Gauge, AlertTriangle, CheckCircle2, XCircle,
     Clock, Wrench, ShieldAlert, ShieldCheck, Activity,

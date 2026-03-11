@@ -8,6 +8,7 @@ import { DashboardHeader } from "@/components/DashboardHeader";
 import { RobotPanel } from "@/components/RobotPanel";
 import { AlertPanel } from "@/components/AlertPanel";
 import { RobotFormDialog } from "@/components/RobotFormDialog";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import {
   initialRobots,
   generateAlert,
@@ -41,7 +42,10 @@ export default function DashboardPage() {
   const [session, setSession] = useState<Session | null>(null);
   // Resizable alert panel
   const [alertHeight, setAlertHeight] = useState(176);
-  const dragRef = React.useRef(false)
+  const dragRef = React.useRef(false);
+
+  // Mobile robot list toggle
+  const [isRobotListExpanded, setIsRobotListExpanded] = useState(false);
 
   // Auth guard
   useEffect(() => {
@@ -169,20 +173,114 @@ export default function DashboardPage() {
 
   if (!session) return null;
 
+  const plan = PLANS[session.plan];
+
   return (
     <div className="flex h-[100dvh] w-screen overflow-hidden bg-[#F1F5F9]">
-      {/* Sidebar — hidden on mobile */}
+      {/* ── DESKTOP: Sidebar (hidden on mobile) ── */}
       <div className="hidden sm:flex">
         <Sidebar />
       </div>
 
-      {/* Main area */}
+      {/* ── MAIN ── */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
         <DashboardHeader session={session} onLogout={handleLogout} />
 
-        {/* Content */}
-        <div className="flex flex-1 overflow-hidden">
+        {/* ────────────────────────────────────────────────
+            MOBILE layout  (<sm): full-width vertical scroll
+            ──────────────────────────────────────────────── */}
+        <div className="flex flex-1 flex-col overflow-y-auto sm:hidden">
+          {/* 3D Scene */}
+          <div style={{ height: "45vw", minHeight: 200, maxHeight: 340 }} className="w-full shrink-0 p-2">
+            <FactoryScene
+              robots={robots}
+              selectedRobotId={selectedRobotId}
+              onSelectRobot={handleSelectRobot}
+            />
+          </div>
+
+          {/* Robot cards */}
+          <div className="shrink-0 border-t border-[#E2E8F0] bg-white px-3 pb-2 pt-2">
+            <div
+              className="mb-2 flex items-center justify-between cursor-pointer"
+              onClick={() => setIsRobotListExpanded(!isRobotListExpanded)}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-semibold uppercase tracking-widest text-[#64748B]">
+                  Robots {plan.robotLimit !== -1 && `(${robots.length}/${plan.robotLimit})`}
+                </span>
+                {isRobotListExpanded ? <ChevronUp size={14} className="text-[#94A3B8]" /> : <ChevronDown size={14} className="text-[#94A3B8]" />}
+              </div>
+              {!atLimit && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleAddRobot(); }}
+                  className="rounded-md bg-[#FD3E06] px-2 py-1 text-[10px] font-semibold text-white"
+                >
+                  + Add
+                </button>
+              )}
+            </div>
+            {isRobotListExpanded && (
+              <div className="grid grid-cols-1 gap-2">
+                {robots.map((robot) => (
+                  <button
+                    key={robot.id}
+                    onClick={() => handleSelectRobot(robot.id)}
+                    className={`flex items-center justify-between rounded-lg border px-3 py-2 transition-all ${selectedRobotId === robot.id
+                      ? "border-[#FD3E06]/40 bg-[#FD3E06]/5"
+                      : "border-[#E2E8F0] bg-white"
+                      }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{
+                          backgroundColor:
+                            robot.status === "running" ? "#22C55E"
+                              : robot.status === "idle" ? "#FACC15" : "#EF4444",
+                        }}
+                      />
+                      <span className="font-mono text-xs font-semibold text-[#0F172A]">{robot.id}</span>
+                      <span className="text-[10px] text-[#64748B]">{robot.name}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-[10px] text-[#94A3B8]">
+                      <span>{robot.temperature}°C</span>
+                      <span>{robot.load}%</span>
+                      <span
+                        className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase ${robot.status === "running"
+                          ? "bg-[#22C55E]/10 text-[#22C55E]"
+                          : robot.status === "idle"
+                            ? "bg-[#FACC15]/10 text-[#FACC15]"
+                            : "bg-[#EF4444]/10 text-[#EF4444]"
+                          }`}
+                      >
+                        {robot.status}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Alert log (single panel) */}
+          <div className="shrink-0 border-t border-[#E2E8F0] bg-white" style={{ minHeight: 200 }}>
+            <AlertPanel
+              alerts={alerts}
+              title={selectedRobotId ? `Event Log — ${selectedRobotId}` : "All Events"}
+              selectedRobotId={selectedRobotId ?? undefined}
+            />
+          </div>
+
+          {/* Bottom padding for mobile bar */}
+          <div className="h-16 shrink-0" />
+        </div>
+
+        {/* ────────────────────────────────────────────────
+            DESKTOP layout  (sm+): original horizontal flex
+            ──────────────────────────────────────────────── */}
+        <div className="hidden flex-1 overflow-hidden sm:flex">
           {/* Center + Bottom */}
           <div className="flex flex-1 flex-col overflow-hidden">
             {/* 3D Scene */}
@@ -195,10 +293,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Alert Panels — resizable via drag handle */}
-            <div
-              style={{ height: alertHeight }}
-              className="shrink-0 flex flex-col"
-            >
+            <div style={{ height: alertHeight }} className="shrink-0 flex flex-col">
               {/* Drag Handle */}
               <div
                 className="group flex h-2.5 w-full cursor-ns-resize items-center justify-center border-t border-[#E2E8F0] bg-white hover:bg-[#FD3E06]/5 transition-colors select-none"
@@ -241,7 +336,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Right Panel */}
+          {/* Right Panel (desktop only) */}
           <RobotPanel
             robots={robots}
             selectedRobotId={selectedRobotId}
@@ -255,6 +350,25 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* ── MOBILE: Bottom navigation bar ── */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-14 items-center justify-around border-t border-[#E2E8F0] bg-white sm:hidden">
+        {[
+          { href: "/dashboard", icon: "🏭", label: "Factory" },
+          { href: "/dashboard/robots", icon: "🤖", label: "Robots" },
+          { href: "/dashboard/alerts", icon: "⚠️", label: "Alerts" },
+          { href: "/dashboard/analytics", icon: "📊", label: "Analytics" },
+        ].map(({ href, icon, label }) => (
+          <a
+            key={href}
+            href={href}
+            className="flex flex-col items-center gap-0.5 px-3 py-1"
+          >
+            <span className="text-lg leading-none">{icon}</span>
+            <span className="text-[9px] font-medium text-[#64748B]">{label}</span>
+          </a>
+        ))}
+      </nav>
+
       {/* Robot Add/Edit Dialog */}
       <RobotFormDialog
         open={formOpen}
@@ -267,3 +381,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

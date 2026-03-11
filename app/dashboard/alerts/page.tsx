@@ -7,6 +7,7 @@ import { DashboardHeader } from "@/components/DashboardHeader";
 import { getSession, clearSession, type Session } from "@/lib/auth";
 import { AlertTriangle, Info, XCircle, ChevronRight, X, Clock, Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 /* ─── Log data ─────────────────────────────────────────────────── */
 interface LogEntry {
