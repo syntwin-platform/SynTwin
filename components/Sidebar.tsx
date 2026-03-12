@@ -29,12 +29,12 @@ export function Sidebar() {
   return (
     <aside className="flex h-full w-16 flex-col items-center border-r border-[#1E293B] bg-[#0F172A] py-4 lg:w-56 lg:items-stretch">
       {/* Logo */}
-      <div className="mb-8 flex items-center justify-center gap-2 px-4">
+      <Link href="/dashboard" className="mb-8 flex items-center justify-center gap-2 px-4 transition-opacity hover:opacity-80">
         <Image src="/images/syntwin-logo.png" alt="SynTwin" width={36} height={36} className="shrink-0" />
         <span className="hidden text-sm font-bold tracking-wider text-[#FD3E06] lg:block">
           SynTwin
         </span>
-      </div>
+      </Link>
 
       {/* Navigation */}
       <nav className="flex flex-1 flex-col gap-1 px-2">

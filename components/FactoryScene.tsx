@@ -26,12 +26,12 @@ function Joint({
       {/* Joint sphere */}
       <mesh>
         <sphereGeometry args={[size, 20, 20]} />
-        <meshStandardMaterial color="#e2e8f0" metalness={0.85} roughness={0.15} />
+        <meshStandardMaterial color="#ffffff" metalness={0.2} roughness={0.1} />
       </mesh>
-      {/* Orange ring around joint */}
+      {/* Orange/Red ring around joint */}
       <mesh rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[size + 0.02, 0.02, 8, 32]} />
-        <meshStandardMaterial color="#FD3E06" emissive="#FD3E06" emissiveIntensity={0.4} />
+        <meshStandardMaterial color="#EF4444" emissive="#EF4444" emissiveIntensity={0.2} />
       </mesh>
       {/* Label (visible when selected) */}
       {isSelected && (
@@ -74,7 +74,7 @@ function Link({
   return (
     <mesh position={mid} rotation={orientation}>
       <cylinderGeometry args={[radius, radius, length, 12]} />
-      <meshStandardMaterial color="#d4d4d8" metalness={0.75} roughness={0.2} />
+      <meshStandardMaterial color="#ffffff" metalness={0.1} roughness={0.15} />
     </mesh>
   );
 }
@@ -134,17 +134,17 @@ function RobotArm({
       {/* Base plate */}
       <mesh position={[0, 0.05, 0]}>
         <cylinderGeometry args={[0.55, 0.6, 0.1, 24]} />
-        <meshStandardMaterial color="#94a3b8" metalness={0.9} roughness={0.15} />
+        <meshStandardMaterial color="#cbd5e1" metalness={0.6} roughness={0.2} />
       </mesh>
-      {/* Base column */}
+      {/* Base column (White) */}
       <mesh position={basePos}>
         <cylinderGeometry args={[0.35, 0.45, 0.3, 20]} />
-        <meshStandardMaterial color="#cbd5e1" metalness={0.8} roughness={0.2} />
+        <meshStandardMaterial color="#ffffff" metalness={0.1} roughness={0.1} />
       </mesh>
-      {/* Base detail ring */}
+      {/* Base detail ring (Red) */}
       <mesh position={[0, 0.32, 0]}>
         <cylinderGeometry args={[0.37, 0.37, 0.04, 20]} />
-        <meshStandardMaterial color="#FD3E06" metalness={0.6} roughness={0.3} />
+        <meshStandardMaterial color="#EF4444" metalness={0.2} roughness={0.2} />
       </mesh>
 
       {/* ── ROTATING ASSEMBLY ── */}
@@ -162,7 +162,7 @@ function RobotArm({
         {/* Upper arm housing */}
         <mesh position={[0, 0.75, 0]}>
           <cylinderGeometry args={[0.1, 0.1, 0.8, 12]} />
-          <meshStandardMaterial color="#e2e8f0" metalness={0.8} roughness={0.2} />
+          <meshStandardMaterial color="#ffffff" metalness={0.1} roughness={0.1} />
         </mesh>
 
         {/* Elbow joint */}
@@ -177,7 +177,7 @@ function RobotArm({
         {/* Forearm housing */}
         <mesh position={[0.1, 1.5, 0.075]} rotation={[0.15, 0, -0.25]}>
           <cylinderGeometry args={[0.08, 0.08, 0.65, 12]} />
-          <meshStandardMaterial color="#d4d4d8" metalness={0.75} roughness={0.2} />
+          <meshStandardMaterial color="#ffffff" metalness={0.1} roughness={0.1} />
         </mesh>
 
         {/* Forearm label joint */}
@@ -193,20 +193,20 @@ function RobotArm({
         {/* Wrist joint */}
         <Joint position={[0.45, 2.2, 0.2]} label="wrist2_link" isSelected={isSelected} size={0.12} />
 
-        {/* End effector / tool */}
+        {/* End effector / tool flange */}
         <mesh position={[0.55, 2.38, 0.22]} rotation={[0.1, 0, -0.4]}>
           <cylinderGeometry args={[0.06, 0.09, 0.25, 12]} />
-          <meshStandardMaterial color="#94a3b8" metalness={0.9} roughness={0.15} />
+          <meshStandardMaterial color="#ffffff" metalness={0.1} roughness={0.1} />
         </mesh>
-        {/* Tool tip */}
+        {/* Tool tip (Metallic) */}
         <mesh position={[0.6, 2.5, 0.23]}>
           <cylinderGeometry args={[0.04, 0.06, 0.1, 12]} />
-          <meshStandardMaterial color="#64748b" metalness={0.9} roughness={0.1} />
+          <meshStandardMaterial color="#cbd5e1" metalness={0.9} roughness={0.2} />
         </mesh>
-        {/* Orange ring on tool */}
+        {/* Red ring on tool */}
         <mesh position={[0.53, 2.28, 0.21]} rotation={[0.1, 0, -0.4]}>
           <torusGeometry args={[0.08, 0.015, 8, 24]} />
-          <meshStandardMaterial color="#FD3E06" emissive="#FD3E06" emissiveIntensity={0.3} />
+          <meshStandardMaterial color="#EF4444" emissive="#EF4444" emissiveIntensity={0.2} />
         </mesh>
       </group>
 
