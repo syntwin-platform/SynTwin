@@ -174,7 +174,7 @@ export default function AlertsPage() {
             {/* ── MAIN ── */}
             <div className="flex flex-1 flex-col overflow-hidden">
                 <DashboardHeader session={session} onLogout={handleLogout} />
-                <div className="flex flex-1 flex-col sm:flex-row overflow-hidden pb-14 sm:pb-0">
+                <div className="flex flex-1 flex-col sm:flex-row overflow-hidden pb-20 sm:pb-0">
 
                     {/* Log list */}
                     <div className={cn("flex flex-col overflow-hidden transition-all", selected ? "w-[420px] shrink-0" : "flex-1")}>

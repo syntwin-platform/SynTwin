@@ -33,8 +33,10 @@ export default function LoginPage() {
                 return;
             }
 
-            // Redirect based on plan
-            if (result.session.plan === "unpaid") {
+            // Redirect based on plan and role
+            if (result.session.isAdmin) {
+                router.push("/admin/dashboard");
+            } else if (result.session.plan === "unpaid") {
                 router.push("/pricing");
             } else {
                 router.push("/dashboard");
@@ -163,14 +165,15 @@ export default function LoginPage() {
                             </p>
                             <div className="space-y-1">
                                 {[
-                                    { email: "operator@syntwin.io", label: "Enterprise (full access)" },
-                                    { email: "basic@syntwin.io", label: "Basic — max 3 robots" },
-                                    { email: "newuser@syntwin.io", label: "Unpaid — pricing page" },
-                                ].map(({ email: e, label }) => (
+                                    { email: "admin@syntwin.io", password: "adminpassword", label: "Admin Dashboard" },
+                                    { email: "operator@syntwin.io", password: "password", label: "Enterprise (full access)" },
+                                    { email: "basic@syntwin.io", password: "password", label: "Basic — max 3 robots" },
+                                    { email: "newuser@syntwin.io", password: "password", label: "Unpaid — pricing page" },
+                                ].map(({ email: e, password: p, label }) => (
                                     <button
                                         key={e}
                                         type="button"
-                                        onClick={() => { setEmail(e); setPassword("password"); }}
+                                        onClick={() => { setEmail(e); setPassword(p); }}
                                         className="block w-full rounded px-2 py-1 text-left text-[10px] text-[#334155] transition-colors hover:bg-[#FD3E06]/5"
                                     >
                                         <span className="font-mono text-[#FD3E06]">{e}</span>

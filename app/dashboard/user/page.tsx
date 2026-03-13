@@ -32,6 +32,10 @@ export default function UserProfilePage() {
             router.replace("/login");
             return;
         }
+        if (s.isAdmin) {
+            router.replace("/admin/dashboard");
+            return;
+        }
         setSession(s);
     }, [router]);
 

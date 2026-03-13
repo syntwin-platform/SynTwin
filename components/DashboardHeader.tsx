@@ -70,7 +70,7 @@ export function DashboardHeader({ session, onLogout }: DashboardHeaderProps) {
                 {planBadge.label}
               </span>
             )}
-            <Link href="/dashboard/user">
+            <Link href={session.isAdmin ? "/admin/dashboard" : "/dashboard/user"}>
               <div
                 className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white transition-opacity hover:opacity-80 cursor-pointer"
                 style={{ backgroundColor: planBadge?.color ?? "#FD3E06" }}

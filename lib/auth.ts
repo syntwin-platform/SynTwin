@@ -33,9 +33,17 @@ export interface Account {
     password: string;
     name: string;
     plan: PlanId;
+    isAdmin?: boolean;
 }
 
 export const ACCOUNTS: Account[] = [
+    {
+        email: "admin@syntwin.io",
+        password: "adminpassword",
+        name: "Admin User",
+        plan: "enterprise",
+        isAdmin: true,
+    },
     {
         email: "operator@syntwin.io",
         password: "password",
@@ -97,6 +105,7 @@ export interface Session {
     email: string;
     name: string;
     plan: PlanId;
+    isAdmin?: boolean;
 }
 
 const SESSION_KEY = "syntwin_session";
@@ -136,6 +145,7 @@ export function login(
         email: account.email,
         name: account.name,
         plan: account.plan,
+        isAdmin: account.isAdmin,
     };
     setSession(session);
     return { ok: true, session };
