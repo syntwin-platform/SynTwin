@@ -12,11 +12,13 @@ import {
   AlertTriangle,
   BarChart3,
   Settings,
+  Building2,
 } from "lucide-react";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: Factory, label: "Factory View", href: "/dashboard" },
+  { icon: Building2, label: "Company", href: "/dashboard/company" },
   { icon: Bot, label: "Robot Management", href: "/dashboard/robots" },
   { icon: AlertTriangle, label: "Alerts", href: "/dashboard/alerts" },
   { icon: BarChart3, label: "Analytics", href: "/dashboard/analytics" },

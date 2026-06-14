@@ -1,21 +1,16 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
-import { getSession } from "@/lib/auth";
+import { useSession } from "@/hooks/useSession";
 
 export default function NotFound() {
-  const [returnPath, setReturnPath] = useState("/dashboard");
-
-  useEffect(() => {
-    const session = getSession();
-    if (session?.isAdmin) {
-      setReturnPath("/admin/dashboard");
-    } else if (session?.plan === "unpaid") {
-      setReturnPath("/pricing");
-    }
-  }, []);
+  const session = useSession();
+  const returnPath = session?.isAdmin
+    ? "/admin/dashboard"
+    : session?.plan === "unpaid"
+      ? "/pricing"
+      : "/dashboard";
 
   return (
     <div className="flex h-[100dvh] w-screen flex-col items-center justify-center bg-[#F9FAFA] p-6 text-center">

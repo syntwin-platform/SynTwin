@@ -28,7 +28,7 @@ const allTransactions = [
 export function FeaturesSection() {
   const [balance, setBalance] = useState(12458.32)
   const scrollRef = useRef<HTMLDivElement>(null)
-  const animationRef = useRef<number>()
+ const animationRef = useRef<number | null>(null)
   const scrollPosition = useRef(0)
   const lastUpdateTime = useRef(0)
 
@@ -64,7 +64,7 @@ export function FeaturesSection() {
     animationRef.current = requestAnimationFrame(animate)
 
     return () => {
-      if (animationRef.current) {
+      if (animationRef.current !== null) {
         cancelAnimationFrame(animationRef.current)
       }
     }

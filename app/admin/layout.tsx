@@ -1,7 +1,7 @@
-import React from "react";
+import { AuthGuard } from "@/components/AuthGuard";
 
 export const metadata = {
-  title: "SynTwin — Admin Dashboard",
+  title: "SynTwin - Admin Dashboard",
 };
 
 export default function AdminLayout({
@@ -9,5 +9,9 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <AuthGuard requireAdmin>
+      {children}
+    </AuthGuard>
+  );
 }

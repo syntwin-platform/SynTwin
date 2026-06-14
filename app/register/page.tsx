@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -10,16 +10,16 @@ import {
     User,
     Mail,
     Lock,
-    Building2,
     CheckCircle2,
 } from "lucide-react";
-import { registerAccount, setSession } from "@/lib/auth";
+import { storeAuthResponse } from "@/lib/auth";
+import { registerUser } from "@/lib/api/auth";
+import { ApiRequestError } from "@/lib/api/types";
 
 export default function RegisterPage() {
     const router = useRouter();
 
     const [fullName, setFullName] = useState("");
-    const [company, setCompany] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -32,7 +32,6 @@ export default function RegisterPage() {
 
     function validate() {
         if (!fullName.trim()) return "Full name is required.";
-        if (!company.trim()) return "Company name is required.";
         if (!email.trim()) return "Email is required.";
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
             return "Please enter a valid email address.";
@@ -42,33 +41,57 @@ export default function RegisterPage() {
         return null;
     }
 
-    function handleSubmit(e: React.FormEvent) {
-        e.preventDefault();
+    async function handleSubmit(
+        event: React.FormEvent
+    ): Promise<void> {
+        event.preventDefault();
         setError("");
 
-        const err = validate();
-        if (err) {
-            setError(err);
+        const validationError = validate();
+
+        if (validationError) {
+            setError(validationError);
             return;
         }
 
         setLoading(true);
-        setTimeout(() => {
-            // Save account to registry
-            registerAccount({
+
+        try {
+            const timezone =
+                Intl.DateTimeFormat().resolvedOptions().timeZone ||
+                "UTC";
+
+            const auth = await registerUser({
                 email,
                 password,
-                name: fullName,
-                plan: "unpaid",
+                fullName,
+                timezone,
             });
-            // Create session
-            setSession({ email, name: fullName, plan: "unpaid" });
-            setLoading(false);
-            setSuccess(true);
-            setTimeout(() => router.push("/pricing"), 1500);
-        }, 1500);
-    }
 
+            const session = storeAuthResponse(auth);
+
+            if (!session) {
+                throw new Error(
+                    "Backend returned an invalid registration response."
+                );
+            }
+
+            setSuccess(true);
+
+            window.setTimeout(() => {
+                router.push("/pricing");
+            }, 1000);
+        } catch (requestError) {
+            setError(
+                requestError instanceof ApiRequestError ||
+                    requestError instanceof Error
+                    ? requestError.message
+                    : "Could not create your account."
+            );
+        } finally {
+            setLoading(false);
+        }
+    }
     /* password strength */
     const strength =
         password.length === 0
@@ -91,7 +114,7 @@ export default function RegisterPage() {
             {/* Nav */}
             <nav className="relative z-10 border-b border-[#E2E8F0] bg-white">
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-                    <a href="/" className="flex items-center gap-2.5">
+                    <Link href="/" className="flex items-center gap-2.5">
                         <Image
                             src="/images/syntwin-logo.png"
                             alt="SynTwin"
@@ -101,17 +124,16 @@ export default function RegisterPage() {
                         <span className="text-base font-bold tracking-wide text-[#0F172A]">
                             SynTwin
                         </span>
-                    </a>
+                    </Link>
                     <div className="flex items-center gap-3">
                         <span className="text-sm text-[#64748B]">
                             Already have an account?
                         </span>
-                        <a
-                            href="/#login"
+                        <Link href="/login"
                             className="rounded-lg border border-[#E2E8F0] px-4 py-2 text-sm font-medium text-[#334155] transition-all hover:border-[#FD3E06]/30 hover:shadow-md"
                         >
                             Sign In
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </nav>
@@ -141,7 +163,7 @@ export default function RegisterPage() {
                                     Account Created!
                                 </h2>
                                 <p className="mt-2 text-sm text-[#64748B]">
-                                    Welcome to SynTwin. Redirecting you to login…
+                                    Welcome to SynTwin. Redirecting you to pricing...
                                 </p>
                             </div>
                         ) : (
@@ -185,23 +207,6 @@ export default function RegisterPage() {
                                                 value={fullName}
                                                 onChange={(e) => setFullName(e.target.value)}
                                                 placeholder="Jane Smith"
-                                                className="h-10 w-full rounded-lg border border-[#E2E8F0] bg-white pl-9 pr-3 text-sm text-[#0F172A] placeholder:text-[#94A3B8] outline-none transition-colors focus:border-[#FD3E06] focus:ring-2 focus:ring-[#FD3E06]/10"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Company */}
-                                    <div>
-                                        <label className="mb-1.5 block text-xs font-medium text-[#334155]">
-                                            Company / Factory
-                                        </label>
-                                        <div className="relative">
-                                            <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
-                                            <input
-                                                type="text"
-                                                value={company}
-                                                onChange={(e) => setCompany(e.target.value)}
-                                                placeholder="Acme Manufacturing"
                                                 className="h-10 w-full rounded-lg border border-[#E2E8F0] bg-white pl-9 pr-3 text-sm text-[#0F172A] placeholder:text-[#94A3B8] outline-none transition-colors focus:border-[#FD3E06] focus:ring-2 focus:ring-[#FD3E06]/10"
                                             />
                                         </div>
@@ -361,12 +366,12 @@ export default function RegisterPage() {
                                 {/* Sign-in link */}
                                 <p className="text-center text-xs text-[#64748B]">
                                     Already have an account?{" "}
-                                    <a
-                                        href="/#login"
+                                    <Link
+                                        href="/login"
                                         className="font-medium text-[#FD3E06] hover:text-[#E63600] hover:underline"
                                     >
                                         Sign in
-                                    </a>
+                                    </Link>
                                 </p>
                             </>
                         )}

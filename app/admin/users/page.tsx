@@ -1,30 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { AdminHeader } from "@/components/AdminHeader";
-import { getSession, type Session } from "@/lib/auth";
-import { ADMIN_MOCK_USERS, type AdminUser } from "@/lib/admin-mock-data";
+import { useSession } from "@/hooks/useSession";
+import { ADMIN_MOCK_USERS } from "@/lib/admin-mock-data";
 import { Search, Filter, MoreHorizontal, UserCheck, UserX } from "lucide-react";
 
 export default function AdminUsersPage() {
-  const router = useRouter();
-  const [session, setSession] = useState<Session | null>(null);
+  const session = useSession();
   const [searchTerm, setSearchTerm] = useState("");
-
-  useEffect(() => {
-    const s = getSession();
-    if (!s || !s.isAdmin) {
-      router.replace("/login");
-      return;
-    }
-    setSession(s);
-  }, [router]);
-
-  function handleLogout() {
-    router.push("/login");
-  }
 
   if (!session) return null;
 
@@ -42,7 +27,7 @@ export default function AdminUsersPage() {
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        <AdminHeader session={session} onLogout={handleLogout} />
+        <AdminHeader session={session} />
 
         {/* Users Content */}
         <div className="flex-1 overflow-y-auto p-4 pb-20 lg:p-8">
