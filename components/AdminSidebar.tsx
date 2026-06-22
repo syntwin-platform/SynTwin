@@ -17,7 +17,6 @@ const navItems = [
   { icon: LayoutDashboard, label: "Overview", href: "/admin/dashboard" },
   { icon: Users, label: "User Management", href: "/admin/users" },
   { icon: Building2, label: "Companies", href: "/admin/companies" },
-  { icon: Settings, label: "Platform Settings", href: "/admin/settings" },
 ];
 
 export function AdminSidebar() {

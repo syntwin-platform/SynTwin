@@ -11,7 +11,7 @@ import {
 } from "@/lib/api/types";
 
 const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5200";
+    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5000";
 
 export interface ApiRequestOptions extends RequestInit {
     authenticated?: boolean;
