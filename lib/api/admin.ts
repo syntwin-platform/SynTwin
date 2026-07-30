@@ -1,5 +1,9 @@
 import { apiRequest } from "@/lib/api/client";
 
+export type AdminUserRole = "User" | "SuperAdmin";
+export type AdminUserStatus = "Active" | "Locked" | "Deleted";
+export type AdminSubscriptionPlan = "Free" | "Basic" | "Premium";
+
 // ────────────────────────────────────────────────────────────
 // AdminUsers — Types
 // ────────────────────────────────────────────────────────────
@@ -8,9 +12,9 @@ export interface AdminUserListItem {
   id: string;
   email: string;
   fullName: string | null;
-  role: string;
-  status: string;
-  subscriptionPlan: string;
+  role: AdminUserRole;
+  status: AdminUserStatus;
+  subscriptionPlan: AdminSubscriptionPlan;
   lastLoginAt: string | null;
   createdAt: string;
 }
@@ -21,9 +25,9 @@ export interface AdminUserDetail {
   fullName: string | null;
   avatarUrl: string | null;
   timezone: string;
-  role: string;
-  status: string;
-  subscriptionPlan: string;
+  role: AdminUserRole;
+  status: AdminUserStatus;
+  subscriptionPlan: AdminSubscriptionPlan;
   lastLoginAt: string | null;
   createdAt: string;
   updatedAt: string | null;
@@ -39,23 +43,24 @@ export interface AdminUserListResponse {
 
 export interface AdminListUsersQuery {
   search?: string;
-  role?: string;
-  status?: string;
-  plan?: string;
+  role?: AdminUserRole;
+  status?: AdminUserStatus;
+  plan?: AdminSubscriptionPlan;
   page?: number;
   pageSize?: number;
+  signal?: AbortSignal;
 }
 
 export interface AdminUpdateUserStatusInput {
-  status: string;
+  status: AdminUserStatus;
 }
 
 export interface AdminUpdateUserRoleInput {
-  role: string;
+  role: AdminUserRole;
 }
 
 export interface AdminUpdateUserSubscriptionInput {
-  subscriptionPlan: string;
+  subscriptionPlan: AdminSubscriptionPlan;
 }
 
 // ────────────────────────────────────────────────────────────
@@ -87,6 +92,21 @@ export interface AdminLinkedAccountInput {
   email: string;
 }
 
+export interface AdminDashboardMetrics {
+  totalUsers: number;
+  activeUsers: number;
+  totalCompanies: number;
+  linkedMonitors: number;
+  usersByStatus: Array<{
+    name: AdminUserStatus;
+    count: number;
+  }>;
+  usersByPlan: Array<{
+    name: AdminSubscriptionPlan;
+    count: number;
+  }>;
+}
+
 // ────────────────────────────────────────────────────────────
 // AdminUsers — API Functions
 // ────────────────────────────────────────────────────────────
@@ -104,7 +124,8 @@ export function adminListUsers(
 
   const qs = params.toString();
   return apiRequest<AdminUserListResponse>(
-    `/api/admin/users${qs ? `?${qs}` : ""}`
+    `/api/admin/users${qs ? `?${qs}` : ""}`,
+    { signal: query.signal }
   );
 }
 
@@ -146,9 +167,14 @@ export function adminUpdateUserSubscription(
 // AdminCompanies — API Functions
 // ────────────────────────────────────────────────────────────
 
-export function adminListCompanies(search?: string): Promise<AdminCompany[]> {
+export function adminListCompanies(
+  search?: string,
+  signal?: AbortSignal
+): Promise<AdminCompany[]> {
   const qs = search ? `?search=${encodeURIComponent(search)}` : "";
-  return apiRequest<AdminCompany[]>(`/api/admin/companies${qs}`);
+  return apiRequest<AdminCompany[]>(`/api/admin/companies${qs}`, {
+    signal,
+  });
 }
 
 export function adminListCompanyMembers(
@@ -194,4 +220,71 @@ export function adminRemoveCompanyMonitor(
     `/api/admin/companies/${companyId}/monitors/${monitorUserId}`,
     { method: "DELETE" }
   );
+}
+
+export async function adminGetDashboardMetrics(
+  signal?: AbortSignal
+): Promise<AdminDashboardMetrics> {
+  const statuses: AdminUserStatus[] = [
+    "Active",
+    "Locked",
+    "Deleted",
+  ];
+  const plans: AdminSubscriptionPlan[] = [
+    "Free",
+    "Basic",
+    "Premium",
+  ];
+
+  const [
+    totalUsersResponse,
+    companies,
+    ...distributionResponses
+  ] = await Promise.all([
+    adminListUsers({ page: 1, pageSize: 1, signal }),
+    adminListCompanies(undefined, signal),
+    ...statuses.map((status) =>
+      adminListUsers({
+        status,
+        page: 1,
+        pageSize: 1,
+        signal,
+      })
+    ),
+    ...plans.map((plan) =>
+      adminListUsers({
+        plan,
+        page: 1,
+        pageSize: 1,
+        signal,
+      })
+    ),
+  ]);
+
+  const statusResponses = distributionResponses.slice(
+    0,
+    statuses.length
+  );
+  const planResponses = distributionResponses.slice(statuses.length);
+  const usersByStatus = statuses.map((name, index) => ({
+    name,
+    count: statusResponses[index].totalItems,
+  }));
+  const usersByPlan = plans.map((name, index) => ({
+    name,
+    count: planResponses[index].totalItems,
+  }));
+
+  return {
+    totalUsers: totalUsersResponse.totalItems,
+    activeUsers:
+      usersByStatus.find(({ name }) => name === "Active")?.count ?? 0,
+    totalCompanies: companies.length,
+    linkedMonitors: companies.reduce(
+      (total, company) => total + company.monitorCount,
+      0
+    ),
+    usersByStatus,
+    usersByPlan,
+  };
 }

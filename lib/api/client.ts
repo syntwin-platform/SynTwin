@@ -126,6 +126,10 @@ async function sendRequest(
             headers,
         });
     } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") {
+            throw error;
+        }
+
         throw new ApiRequestError(
             0,
             error instanceof Error

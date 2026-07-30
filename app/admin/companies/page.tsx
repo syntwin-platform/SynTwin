@@ -15,14 +15,14 @@ import { AdminHeader } from "@/components/AdminHeader";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { useSession } from "@/hooks/useSession";
 import {
-    addAdminCompanyMonitor,
-    listAdminCompanies,
-    listAdminCompanyMembers,
-    removeAdminCompanyMonitor,
-    replaceAdminCompanyMonitor,
+    adminAddCompanyMonitor,
+    adminListCompanies,
+    adminListCompanyMembers,
+    adminRemoveCompanyMonitor,
+    adminReplaceCompanyMonitor,
     type AdminCompany,
     type AdminCompanyMember,
-} from "@/lib/admin-companies";
+} from "@/lib/api/admin";
 
 export default function AdminCompaniesPage() {
     const session = useSession();
@@ -48,7 +48,7 @@ export default function AdminCompaniesPage() {
     const monitors = members.filter((member) => member.role === "Monitor");
 
     const loadMembers = useCallback(async (companyId: string) => {
-        const response = await listAdminCompanyMembers(companyId);
+        const response = await adminListCompanyMembers(companyId);
         setMembers(response);
         setEditedEmails(
             Object.fromEntries(
@@ -65,7 +65,7 @@ export default function AdminCompaniesPage() {
             setError("");
 
             try {
-                const response = await listAdminCompanies(searchValue);
+                const response = await adminListCompanies(searchValue.trim());
                 setCompanies(response);
 
                 const current = response[0];
@@ -129,9 +129,9 @@ export default function AdminCompaniesPage() {
         setSuccess("");
 
         try {
-            const monitor = await addAdminCompanyMonitor(
+            const monitor = await adminAddCompanyMonitor(
                 selectedCompany.id,
-                newMonitorEmail
+                { email: newMonitorEmail.trim() }
             );
             setMembers((current) => [...current, monitor]);
             setEditedEmails((current) => ({
@@ -167,10 +167,10 @@ export default function AdminCompaniesPage() {
         setSuccess("");
 
         try {
-            const replacement = await replaceAdminCompanyMonitor(
+            const replacement = await adminReplaceCompanyMonitor(
                 selectedCompany.id,
                 monitor.userId,
-                email
+                { email }
             );
             setMembers((current) =>
                 current.map((member) =>
@@ -206,7 +206,7 @@ export default function AdminCompaniesPage() {
         setSuccess("");
 
         try {
-            await removeAdminCompanyMonitor(
+            await adminRemoveCompanyMonitor(
                 selectedCompany.id,
                 monitor.userId
             );

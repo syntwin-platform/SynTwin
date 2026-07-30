@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Users,
-  Settings,
   ShieldCheck,
   Building2
 } from "lucide-react";

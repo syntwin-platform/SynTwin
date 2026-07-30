@@ -28,6 +28,9 @@ import {
   adminUpdateUserRole,
   adminUpdateUserStatus,
   adminUpdateUserSubscription,
+  type AdminSubscriptionPlan,
+  type AdminUserRole,
+  type AdminUserStatus,
   type AdminUserDetail,
   type AdminUserListItem,
 } from "@/lib/api/admin";
@@ -36,18 +39,15 @@ import {
 // Constants
 // ─────────────────────────────────────────────────────────────
 
-const ROLES = ["", "User", "SuperAdmin"] as const;
-const STATUSES = ["", "Active", "Locked"] as const;
-const PLANS = ["", "Free", "Basic", "Enterprise"] as const;
 const PAGE_SIZE = 20;
 
 // ─────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────
 
-type RoleValue = (typeof ROLES)[number];
-type StatusValue = (typeof STATUSES)[number];
-type PlanValue = (typeof PLANS)[number];
+type RoleValue = "" | AdminUserRole;
+type StatusValue = "" | AdminUserStatus;
+type PlanValue = "" | AdminSubscriptionPlan;
 
 interface Filters {
   search: string;
@@ -100,7 +100,8 @@ export default function AdminUsersPage() {
   const loadUsers = useCallback(
     async (currentFilters: Filters, currentPage: number) => {
       abortRef.current?.abort();
-      abortRef.current = new AbortController();
+      const controller = new AbortController();
+      abortRef.current = controller;
 
       setLoading(true);
       setError("");
@@ -113,6 +114,7 @@ export default function AdminUsersPage() {
           plan: currentFilters.plan || undefined,
           page: currentPage,
           pageSize: PAGE_SIZE,
+          signal: controller.signal,
         });
 
         setUsers(response.items);
@@ -127,7 +129,9 @@ export default function AdminUsersPage() {
         }
         setError(getErrorMessage(err));
       } finally {
-        setLoading(false);
+        if (abortRef.current === controller) {
+          setLoading(false);
+        }
       }
     },
     []
@@ -135,9 +139,17 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     if (!session) return;
-    void loadUsers(filters, page);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, filters, page]);
+
+    const timeoutId = window.setTimeout(() => {
+      void loadUsers(filters, page);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      abortRef.current?.abort();
+      abortRef.current = null;
+    };
+  }, [session, filters, page, loadUsers]);
 
   function applySearch(
     event: React.FormEvent<HTMLFormElement>
@@ -194,7 +206,7 @@ export default function AdminUsersPage() {
     try {
       const updated = await adminUpdateUserStatus(
         selectedUser.id,
-        { status: editStatus }
+        { status: editStatus as AdminUserStatus }
       );
       setSelectedUser(updated);
       setEditStatus(updated.status);
@@ -219,7 +231,7 @@ export default function AdminUsersPage() {
     try {
       const updated = await adminUpdateUserRole(
         selectedUser.id,
-        { role: editRole }
+        { role: editRole as AdminUserRole }
       );
       setSelectedUser(updated);
       setEditRole(updated.role);
@@ -247,7 +259,7 @@ export default function AdminUsersPage() {
     try {
       const updated = await adminUpdateUserSubscription(
         selectedUser.id,
-        { subscriptionPlan: editPlan }
+        { subscriptionPlan: editPlan as AdminSubscriptionPlan }
       );
       setSelectedUser(updated);
       setEditPlan(updated.subscriptionPlan);
@@ -380,8 +392,9 @@ export default function AdminUsersPage() {
                   "All statuses",
                   "Active",
                   "Locked",
+                  "Deleted",
                 ]}  
-                values={["", "Active", "Locked"]}
+                values={["", "Active", "Locked", "Deleted"]}
                 onChange={(v) =>
                   applyFilter("status", v as StatusValue)
                 }
@@ -393,9 +406,9 @@ export default function AdminUsersPage() {
                   "All plans",
                   "Free",
                   "Basic",
-                  "Enterprise",
+                  "Premium",
                 ]}
-                values={["", "Free", "Basic", "Enterprise"]}
+                values={["", "Free", "Basic", "Premium"]}
                 onChange={(v) =>
                   applyFilter("plan", v as PlanValue)
                 }
@@ -774,6 +787,11 @@ function UserDetailModal({
                 >
                   <option value="Active">Active</option>
                   <option value="Locked">Locked</option>
+                  {user.status === "Deleted" && (
+                    <option value="Deleted" disabled>
+                      Deleted
+                    </option>
+                  )}
                 </select>
                 <SaveButton
                   dirty={editStatus !== user.status}
@@ -812,7 +830,7 @@ function UserDetailModal({
                 >
                   <option value="Free">Free</option>
                   <option value="Basic">Basic</option>
-                  <option value="Enterprise">Enterprise</option>
+                  <option value="Premium">Premium</option>
                 </select>
                 <SaveButton
                   dirty={editPlan !== user.subscriptionPlan}
@@ -911,7 +929,7 @@ function PlanBadge({ plan }: { plan: string }) {
     string,
     { bg: string; text: string }
   > = {
-    Enterprise: {
+    Premium: {
       bg: "bg-purple-100",
       text: "text-purple-700",
     },

@@ -40,16 +40,13 @@ const implSet = new Set();
 for (const f of files) {
   const src = readFileSync(path.join(apiDir, f), "utf8");
 
-  // Find every occurrence of apiRequest
-  let searchFrom = 0;
-  while (true) {
-    const callStart = src.indexOf("apiRequest", searchFrom);
-    if (callStart === -1) break;
-    searchFrom = callStart + 1;
-
-    // Find the opening paren
-    const parenIdx = src.indexOf("(", callStart);
-    if (parenIdx === -1 || parenIdx > callStart + 30) continue;
+  // Match calls with or without a generic response type. The previous
+  // fixed 30-character lookup skipped calls such as
+  // apiRequest<AdminUserListResponse>(...).
+  const callPattern = /apiRequest(?:<[^>]+>)?\s*\(/g;
+  let callMatch;
+  while ((callMatch = callPattern.exec(src)) !== null) {
+    const parenIdx = callMatch.index + callMatch[0].lastIndexOf("(");
 
     // Grab window after paren for path + options
     const window = src.slice(parenIdx + 1, parenIdx + 800);
@@ -68,12 +65,21 @@ for (const f of files) {
 
     if (!rawPath) continue;
 
-    // Normalize template expressions like ${id}, ${robotId}, etc.
-    const normPath = rawPath.replace(/\$\{[^}]+\}/g, "{X}");
+    // Query-string variables do not change the Swagger path. Route
+    // parameters still normalize to {X}.
+    const normPath = rawPath
+      .replace(/\$\{(?:qs|query)[^}]*\}?/g, "")
+      .replace(/\$\{[^}]+\}/g, "{X}");
 
-    // Look for method in remaining window (after path)
+    // Look for method only inside this call. Scanning a fixed window could
+    // accidentally pick up the method from the next apiRequest call.
     const afterPath = window.slice(pathEnd, pathEnd + 400);
-    const methodMatch = afterPath.match(/method\s*:\s*["']([A-Z]+)["']/);
+    const callEnd = afterPath.indexOf(");");
+    const callOptions =
+      callEnd === -1 ? afterPath : afterPath.slice(0, callEnd);
+    const methodMatch = callOptions.match(
+      /method\s*:\s*["']([A-Z]+)["']/
+    );
     const method = methodMatch ? methodMatch[1] : "GET";
 
     const key = `${method} ${normPath}`;
