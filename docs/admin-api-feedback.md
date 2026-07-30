@@ -4,7 +4,7 @@
 
 **Frontend:** https://syn-twin-kappa.vercel.app
 
-**Backend staging:** https://syntwin-api-staging-v7emjerksa-as.a.run.app
+**Backend staging:** https://syntwin-api-staging-635200920916.asia-southeast1.run.app
 
 ## Kết luận
 
