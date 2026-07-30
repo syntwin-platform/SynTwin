@@ -74,3 +74,33 @@ tại hoạt động.
 API coverage audit còn ghi nhận `GET /api/device/commands/pending` chưa có
 frontend wrapper. Đây không phải API của admin dashboard và chưa được thay đổi
 trong công việc này.
+
+## Console incidents
+
+### `/dashboard/settings` trả `404`
+
+Nguyên nhân là Sidebar từng trỏ đến route chưa tồn tại. Trang settings thực tế
+đang nằm tại `/dashboard/user`.
+
+Frontend đã:
+
+- đổi link Settings sang `/dashboard/user`;
+- thêm redirect tương thích `/dashboard/settings` sang `/dashboard/user` để
+  các tab hoặc chunk cũ đang prefetch không còn nhận `404`.
+
+### Login gọi API staging cũ và trả `401`
+
+Bundle production hiện tại đã được kiểm tra và chỉ chứa API URL:
+
+```text
+https://syntwin-api-staging-635200920916.asia-southeast1.run.app
+```
+
+Bundle không còn URL `syntwin-api-staging-v7emjerksa-as.a.run.app` hoặc
+`localhost:5000`. Request tới URL cũ trong console đến từ document/chunk đã tải
+trước deployment; cần hard refresh tab đang mở.
+
+Cả API cũ và API mới đều trả `401` với body
+`{"message":"Invalid email or password."}` khi credential không hợp lệ. Nếu
+request đã đi tới API URL mới mà vẫn `401`, cần kiểm tra tài khoản trong
+database staging mới; đây không phải lỗi route hoặc CORS của frontend.

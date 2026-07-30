@@ -22,7 +22,7 @@ const navItems = [
   { icon: Bot, label: "Robot Management", href: "/dashboard/robots" },
   { icon: AlertTriangle, label: "Alerts", href: "/dashboard/alerts" },
   { icon: BarChart3, label: "Analytics", href: "/dashboard/analytics" },
-  { icon: Settings, label: "Settings", href: "/dashboard/settings" },
+  { icon: Settings, label: "Settings", href: "/dashboard/user" },
 ];
 
 export function Sidebar() {
