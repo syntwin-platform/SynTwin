@@ -104,3 +104,44 @@ Cả API cũ và API mới đều trả `401` với body
 `{"message":"Invalid email or password."}` khi credential không hợp lệ. Nếu
 request đã đi tới API URL mới mà vẫn `401`, cần kiểm tra tài khoản trong
 database staging mới; đây không phải lỗi route hoặc CORS của frontend.
+
+## Chẩn đoán backend cho login `401`
+
+Kiểm tra lại ngày 2026-07-31 với API staging mới:
+
+- `GET /health/live` trả `200`.
+- `GET /health/ready` trả `200`.
+- `GET /api/subscription-plans` trả `200`.
+- `GET /api/admin/users` không có token trả `401` đúng thiết kế.
+- CORS trả đúng origin `https://syn-twin-kappa.vercel.app`.
+
+Vì vậy backend service, database health và CORS vẫn hoạt động. `POST /api/auth/login`
+trả `401 {"message":"Invalid email or password."}` chỉ khi:
+
+1. không tìm thấy email đã được normalize trong bảng users; hoặc
+2. BCrypt password không khớp với `PasswordHash`.
+
+Tài khoản không active sẽ trả `403`, nên không phải trường hợp của lỗi console hiện tại.
+
+### Rủi ro cấu hình/seed cần backend kiểm tra
+
+- Production đang đặt `Seed:SuperAdmin:Enabled=false`.
+- SuperAdmin chỉ được seed khi chạy riêng `Syntwin.DbMigrator` với seed được bật và
+  có email/password hợp lệ.
+- `cloudbuild.yaml` chỉ build/push image db-migrator, không chạy migration/seed job.
+- Nếu user đã tồn tại, seeder hiện chỉ cập nhật `Role` và `Status`; nó **không cập
+  nhật `PasswordHash`**. Do đó đổi password secret rồi chạy lại seed không đổi mật
+  khẩu đăng nhập của tài khoản đã tồn tại.
+
+Backend owner cần kiểm tra database mà Cloud Run staging mới đang kết nối:
+
+1. email đăng nhập có tồn tại sau khi normalize lowercase hay không;
+2. `Status` có phải `Active` và `Role` có phải `SuperAdmin` hay không;
+3. password hash có đúng với credential đang cấp hay cần reset an toàn;
+4. `ConnectionStrings__SyntwinDb` có trỏ đến đúng staging database hay không;
+5. db-migrator/seed job đã thực sự được chạy cho database đó hay chưa.
+
+Không thể phân biệt chính xác “email không tồn tại” với “sai password” chỉ từ response
+public vì backend cố ý dùng cùng thông báo để tránh lộ tài khoản. Cần quyền đọc log/DB
+hoặc email của tài khoản test (không cần và không nên chia sẻ password) để xác nhận
+nhánh cụ thể.
