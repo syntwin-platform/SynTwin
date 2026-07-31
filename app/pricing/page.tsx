@@ -39,7 +39,7 @@ const PACKAGES: StaticPackageInfo[] = [
         monthlyPrice: 5000000,
         robotsFormatted: "Up to 5 robots",
         target: "Doanh nghiệp quy mô khởi đầu",
-        backendPlan: "Basic",
+        backendPlan: "Starter",
         isHighlighted: false,
         features: [
             "Giám sát tối đa 5 robot",
@@ -56,7 +56,7 @@ const PACKAGES: StaticPackageInfo[] = [
         monthlyPrice: 15000000,
         robotsFormatted: "Up to 20 robots",
         target: "Gói tiêu chuẩn dành cho SME",
-        backendPlan: "Basic",
+        backendPlan: "Business",
         isHighlighted: true,
         badge: "Phổ biến",
         features: [
@@ -75,7 +75,7 @@ const PACKAGES: StaticPackageInfo[] = [
         monthlyPrice: 50000000,
         robotsFormatted: "Over 20 robots",
         target: "Tập đoàn & nhà máy quy mô lớn",
-        backendPlan: "Premium",
+        backendPlan: "Enterprise",
         isHighlighted: false,
         features: [
             "Quản lý trên 20 robot không giới hạn",
@@ -252,7 +252,7 @@ export default function PricingPage() {
                                 key={pkg.code}
                                 data-selected={
                                     selectedPlan === pkg.code ||
-                                    (selectedPlan === pkg.backendPlan && (pkg.isHighlighted || pkg.backendPlan === "Premium"))
+                                    selectedPlan === pkg.backendPlan
                                         ? "true"
                                         : undefined
                                 }

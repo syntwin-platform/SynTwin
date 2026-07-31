@@ -445,10 +445,13 @@ export default function AdminUsersPage() {
                 options={[
                   "Tất cả gói",
                   "Free",
+                  "Starter",
+                  "Business",
+                  "Enterprise",
                   "Basic",
                   "Premium",
                 ]}
-                values={["", "Free", "Basic", "Premium"]}
+                values={["", "Free", "Starter", "Business", "Enterprise", "Basic", "Premium"]}
                 onChange={(v) =>
                   applyFilter("plan", v as PlanValue)
                 }
@@ -857,6 +860,9 @@ function UserDetailModal({
                   className="h-9 rounded-lg border border-[#DCE3EC] bg-white px-2 text-sm text-[#0F172A] outline-none focus:border-[#C52F00]"
                 >
                   <option value="Free">Free</option>
+                  <option value="Starter">Starter</option>
+                  <option value="Business">Business</option>
+                  <option value="Enterprise">Enterprise</option>
                   <option value="Basic">Basic</option>
                   <option value="Premium">Premium</option>
                 </select>

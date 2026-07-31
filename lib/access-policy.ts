@@ -33,7 +33,10 @@ export function isPaidCustomer(
 ): boolean {
     return (
         session?.role === "User" &&
-        (session.subscriptionPlan === "Basic" ||
+        (session.subscriptionPlan === "Starter" ||
+            session.subscriptionPlan === "Business" ||
+            session.subscriptionPlan === "Enterprise" ||
+            session.subscriptionPlan === "Basic" ||
             session.subscriptionPlan === "Premium")
     );
 }

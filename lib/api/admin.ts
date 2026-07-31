@@ -2,7 +2,13 @@ import { apiRequest } from "@/lib/api/client";
 
 export type AdminUserRole = "User" | "SuperAdmin";
 export type AdminUserStatus = "Active" | "Locked" | "Deleted";
-export type AdminSubscriptionPlan = "Free" | "Basic" | "Premium";
+export type AdminSubscriptionPlan =
+  | "Free"
+  | "Starter"
+  | "Business"
+  | "Enterprise"
+  | "Basic"
+  | "Premium";
 
 // ────────────────────────────────────────────────────────────
 // AdminUsers — Types

@@ -24,7 +24,13 @@ export const PLANS: Record<PlanId, Plan> = {
     },
 };
 
-export type BackendSubscriptionPlan = "Free" | "Basic" | "Premium";
+export type BackendSubscriptionPlan =
+    | "Free"
+    | "Starter"
+    | "Business"
+    | "Enterprise"
+    | "Basic"
+    | "Premium";
 export type BackendUserRole = "User" | "SuperAdmin";
 
 export interface Session {
@@ -72,9 +78,12 @@ const SESSION_CHANGED_EVENT = "syntwin-session-changed";
 
 function mapPlan(subscriptionPlan: BackendSubscriptionPlan): PlanId {
     switch (subscriptionPlan) {
+        case "Enterprise":
         case "Premium":
             return "enterprise";
 
+        case "Business":
+        case "Starter":
         case "Basic":
             return "basic";
 

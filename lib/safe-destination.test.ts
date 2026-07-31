@@ -12,6 +12,9 @@ describe("isSafeDestination", () => {
         "/dashboard/robots?status=online",
         "/admin/dashboard",
         "/pricing",
+        "/pricing?plan=Starter",
+        "/pricing?plan=Business",
+        "/pricing?plan=Enterprise",
         "/pricing?plan=Basic",
         "/pricing?plan=Premium",
         "/payment/vnpay-return?txnRef=ST-20260731_001",
@@ -35,7 +38,7 @@ describe("isSafeDestination", () => {
         "/payment/vnpay-return?txnRef=ok&status=Paid",
         "/payment/vnpay-return?responseCode=00&signatureValid=yes&status=success&transactionStatus=00&txnRef=ST-1",
         "/payment/vnpay-return?responseCode=00&signatureValid=true&status=unknown&transactionStatus=00&txnRef=ST-1",
-        "/pricing?plan=Enterprise",
+        "/pricing?plan=InvalidPlan",
         "/pricing?plan=basic",
         "/pricing?plan=Basic&return=https://evil.example",
     ])("rejects the unsafe or ineligible destination %s", (destination) => {
@@ -68,11 +71,14 @@ describe("getSafeDestination", () => {
 
 describe("getEligiblePricingDestination", () => {
     it.each([
+        ["/pricing?plan=Starter", "/pricing?plan=Starter"],
+        ["/pricing?plan=Business", "/pricing?plan=Business"],
+        ["/pricing?plan=Enterprise", "/pricing?plan=Enterprise"],
         ["/pricing?plan=Basic", "/pricing?plan=Basic"],
         ["/pricing?plan=Premium", "/pricing?plan=Premium"],
         ["/pricing", "/pricing"],
         ["/pricing?plan=Free", null],
-        ["/pricing?plan=Enterprise", null],
+        ["/pricing?plan=Unknown", null],
         ["/pricing?plan=Basic&checkout=1", null],
         ["https://evil.example/pricing?plan=Basic", null],
     ] as const)("normalizes %s", (destination, expected) => {

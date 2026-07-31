@@ -138,7 +138,9 @@ export function getEligiblePricingDestination(
     if (
         entries.length !== 1 ||
         entries[0][0] !== "plan" ||
-        !["Basic", "Premium"].includes(entries[0][1])
+        !["Starter", "Business", "Enterprise", "Basic", "Premium"].includes(
+            entries[0][1]
+        )
     ) {
         return null;
     }
