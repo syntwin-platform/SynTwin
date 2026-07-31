@@ -1,0 +1,326 @@
+{
+  "generatedAt": "2026-07-30T19:26:25.733Z",
+  "limitBytes": 500000,
+  "assets": [
+    {
+      "path": ".next/static/chunks/0_7yd4hhlcnf5.js",
+      "bytes": 227
+    },
+    {
+      "path": ".next/static/chunks/007hh9cc2li2w.js",
+      "bytes": 13082
+    },
+    {
+      "path": ".next/static/chunks/012h77p15duod.js",
+      "bytes": 35323
+    },
+    {
+      "path": ".next/static/chunks/05-c3ty_6dwfk.js",
+      "bytes": 3377
+    },
+    {
+      "path": ".next/static/chunks/0b9bo6wxumh7m.js",
+      "bytes": 1037990
+    },
+    {
+      "path": ".next/static/chunks/0c_k6f8pi3shv.js",
+      "bytes": 56825
+    },
+    {
+      "path": ".next/static/chunks/0cz1d0mv5g_q7.js",
+      "bytes": 112594
+    },
+    {
+      "path": ".next/static/chunks/0hzl7nnux6pid.js",
+      "bytes": 29940
+    },
+    {
+      "path": ".next/static/chunks/0rhb2x6-o1vn1.js",
+      "bytes": 19974
+    },
+    {
+      "path": ".next/static/chunks/0wn_bn79oxrt8.js",
+      "bytes": 12453
+    },
+    {
+      "path": ".next/static/chunks/0z-6kz2izqs3-.js",
+      "bytes": 137581
+    },
+    {
+      "path": ".next/static/chunks/10fdf3tpqjyvi.js",
+      "bytes": 35323
+    },
+    {
+      "path": ".next/static/chunks/190zn1h-lnnet.js",
+      "bytes": 31994
+    },
+    {
+      "path": ".next/static/chunks/1e5g1ka1p3pra.js",
+      "bytes": 27602
+    },
+    {
+      "path": ".next/static/chunks/1fkj239iv4roq.js",
+      "bytes": 21508
+    },
+    {
+      "path": ".next/static/chunks/1gn-9o6our9a_.js",
+      "bytes": 35323
+    },
+    {
+      "path": ".next/static/chunks/1ixs77sslz7mj.js",
+      "bytes": 47192
+    },
+    {
+      "path": ".next/static/chunks/1kx9mzzy50h56.js",
+      "bytes": 5119
+    },
+    {
+      "path": ".next/static/chunks/1omcy2zykpzak.js",
+      "bytes": 29940
+    },
+    {
+      "path": ".next/static/chunks/1plucouxfft7n.js",
+      "bytes": 27602
+    },
+    {
+      "path": ".next/static/chunks/1t-o6m3c_l162.js",
+      "bytes": 9620
+    },
+    {
+      "path": ".next/static/chunks/1u12o2gzr-pg4.js",
+      "bytes": 27602
+    },
+    {
+      "path": ".next/static/chunks/1upe53-127sm4.js",
+      "bytes": 227315
+    },
+    {
+      "path": ".next/static/chunks/1ydvukq3lf5x5.js",
+      "bytes": 385199
+    },
+    {
+      "path": ".next/static/chunks/2-2ub2p43n0hh.js",
+      "bytes": 28548
+    },
+    {
+      "path": ".next/static/chunks/26w78jyl5ol5r.css",
+      "bytes": 4165
+    },
+    {
+      "path": ".next/static/chunks/27jktro2p5rq9.js",
+      "bytes": 44414
+    },
+    {
+      "path": ".next/static/chunks/2duxlqly-ybeo.js",
+      "bytes": 24543
+    },
+    {
+      "path": ".next/static/chunks/2hl6e0m3o83cr.js",
+      "bytes": 14191
+    },
+    {
+      "path": ".next/static/chunks/2ic5rc4lz4k9q.js",
+      "bytes": 35323
+    },
+    {
+      "path": ".next/static/chunks/2n0f74m8x7nsg.js",
+      "bytes": 5941
+    },
+    {
+      "path": ".next/static/chunks/2sd4lalruoi4v.js",
+      "bytes": 54644
+    },
+    {
+      "path": ".next/static/chunks/2u3z5ykxa-jei.js",
+      "bytes": 12155
+    },
+    {
+      "path": ".next/static/chunks/2x8mg5kt8p4ut.js",
+      "bytes": 31396
+    },
+    {
+      "path": ".next/static/chunks/2zjueh7t2vecu.js",
+      "bytes": 5587
+    },
+    {
+      "path": ".next/static/chunks/2zrn5yl64jc3h.js",
+      "bytes": 26838
+    },
+    {
+      "path": ".next/static/chunks/36bbb_bky891-.js",
+      "bytes": 473
+    },
+    {
+      "path": ".next/static/chunks/39dmf959hu2dj.js",
+      "bytes": 35323
+    },
+    {
+      "path": ".next/static/chunks/3a3jmseu2vp0n.js",
+      "bytes": 27602
+    },
+    {
+      "path": ".next/static/chunks/3eiq9b9oers5d.js",
+      "bytes": 17023
+    },
+    {
+      "path": ".next/static/chunks/3i_e2tspoj8_x.js",
+      "bytes": 10130
+    },
+    {
+      "path": ".next/static/chunks/3tr7ifxk83ebj.js",
+      "bytes": 27602
+    },
+    {
+      "path": ".next/static/chunks/431094fj24amy.js",
+      "bytes": 9260
+    },
+    {
+      "path": ".next/static/chunks/43d1et0pw9jjn.css",
+      "bytes": 152260
+    },
+    {
+      "path": ".next/static/chunks/turbopack-0lvkdux_akku-.js",
+      "bytes": 10613
+    },
+    {
+      "path": ".next/static/media/13bf9871fe164e7f-s.2f7nqdagzwx2-.woff2",
+      "bytes": 2020
+    },
+    {
+      "path": ".next/static/media/1bffadaabf893a1e-s.3-6t-g6q0vh0a.woff2",
+      "bytes": 85272
+    },
+    {
+      "path": ".next/static/media/2bbe8d2671613f1f-s.0k62hbripvv8p.woff2",
+      "bytes": 10280
+    },
+    {
+      "path": ".next/static/media/2c55a0e60120577a-s.0-dom-5bn10r2.woff2",
+      "bytes": 25844
+    },
+    {
+      "path": ".next/static/media/3fe682a82f50d426-s.0vfdmo25voy_0.woff2",
+      "bytes": 15204
+    },
+    {
+      "path": ".next/static/media/5476f68d60460930-s.2uwcyprjm3xu3.woff2",
+      "bytes": 19044
+    },
+    {
+      "path": ".next/static/media/70bc3e132a0a741e-s.p.3t6q91iet4nsy.woff2",
+      "bytes": 40480
+    },
+    {
+      "path": ".next/static/media/71b036adf157cdcf-s.0bp8oijd_gu96.woff2",
+      "bytes": 9084
+    },
+    {
+      "path": ".next/static/media/83afe278b6a6bb3c-s.p.2bn3s6zvc0dyp.woff2",
+      "bytes": 48432
+    },
+    {
+      "path": ".next/static/media/89b21bb081cb7469-s.1fby2rem9ngyr.woff2",
+      "bytes": 7468
+    },
+    {
+      "path": ".next/static/media/9c72aa0f40e4eef8-s.1y4-pdgsjb-pw.woff2",
+      "bytes": 18744
+    },
+    {
+      "path": ".next/static/media/ad66f9afd8947f86-s.3lvt2whj97whp.woff2",
+      "bytes": 11272
+    },
+    {
+      "path": ".next/static/media/cc545e633e20c56d-s.176arc174-8zp.woff2",
+      "bytes": 12064
+    },
+    {
+      "path": ".next/static/media/icon.19nrj9_kpwqvh.svg",
+      "bytes": 1329
+    },
+    {
+      "path": ".next/static/Y8FRZZtOLDOuo2T9Q3xqI/_buildManifest.js",
+      "bytes": 219
+    },
+    {
+      "path": ".next/static/Y8FRZZtOLDOuo2T9Q3xqI/_clientMiddlewareManifest.js",
+      "bytes": 96
+    },
+    {
+      "path": ".next/static/Y8FRZZtOLDOuo2T9Q3xqI/_ssgManifest.js",
+      "bytes": 80
+    },
+    {
+      "path": "public/apple-icon.png",
+      "bytes": 3504
+    },
+    {
+      "path": "public/icon-dark-32x32.png",
+      "bytes": 780
+    },
+    {
+      "path": "public/icon-light-32x32.png",
+      "bytes": 756
+    },
+    {
+      "path": "public/icon.svg",
+      "bytes": 1740
+    },
+    {
+      "path": "public/images/card-hand.png",
+      "bytes": 689616
+    },
+    {
+      "path": "public/images/card-marble.png",
+      "bytes": 514892
+    },
+    {
+      "path": "public/images/cards.png",
+      "bytes": 429936
+    },
+    {
+      "path": "public/images/ipad-hand.png",
+      "bytes": 1005036
+    },
+    {
+      "path": "public/images/iphone-hand-1.png",
+      "bytes": 252240
+    },
+    {
+      "path": "public/images/syntwin-logo.png",
+      "bytes": 277826
+    },
+    {
+      "path": "public/images/syntwin-logo.svg",
+      "bytes": 5573
+    },
+    {
+      "path": "public/images/watch-hand.png",
+      "bytes": 630520
+    },
+    {
+      "path": "public/placeholder-logo.png",
+      "bytes": 760
+    },
+    {
+      "path": "public/placeholder-logo.svg",
+      "bytes": 4280
+    },
+    {
+      "path": "public/placeholder-user.jpg",
+      "bytes": 2180
+    },
+    {
+      "path": "public/placeholder.jpg",
+      "bytes": 1420
+    },
+    {
+      "path": "public/placeholder.svg",
+      "bytes": 4340
+    },
+    {
+      "path": "public/ROBOT ARM SOLUTION LOGO.png",
+      "bytes": 277826
+    }
+  ]
+}

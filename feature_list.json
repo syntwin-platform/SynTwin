@@ -1,0 +1,62 @@
+[
+  {
+    "id": "public-credible-landing",
+    "title": "Understand SynTwin capabilities from a credible public landing page",
+    "user_visible_behavior": "so that a factory owner or manager can make an informed evaluation without marketing hype",
+    "verification_command": "Accepted when `/` presents product value, representative interface, capabilities, operating flow, access/security, live plan path, FAQ, and sign-in/register CTAs without unsupported metrics, logos, or 3D claims.",
+    "status": "not_started",
+    "evidence": "",
+    "notes": "",
+    "priority": "P1"
+  },
+  {
+    "id": "free-simulated-demo",
+    "title": "Explore a complete simulated dashboard as an authenticated Free user",
+    "user_visible_behavior": "so that a Free user can understand the service before purchasing",
+    "verification_command": "Accepted when `/dashboard/demo` is accessible only to authenticated Free users, clearly labels all values as simulated, uses deterministic mock data, exposes no real mutation, and links to Basic/Premium pricing.",
+    "status": "not_started",
+    "evidence": "",
+    "notes": "",
+    "priority": "P1"
+  },
+  {
+    "id": "paid-real-dashboard",
+    "title": "Use operational dashboards backed by real API data",
+    "user_visible_behavior": "so that Basic and Premium users can monitor and manage their factory",
+    "verification_command": "Accepted when Basic/Premium sessions reach all current customer routes and every existing read/write workflow still works with no 3D canvas.",
+    "status": "not_started",
+    "evidence": "",
+    "notes": "",
+    "priority": "P1"
+  },
+  {
+    "id": "free-route-paywall",
+    "title": "Guide Free users from protected routes to demo or upgrade",
+    "user_visible_behavior": "so that a Free user understands why access is restricted and what to do next",
+    "verification_command": "Accepted when every real `/dashboard/**` route except `/dashboard/demo` blocks Free users before protected content renders and provides a deterministic demo/pricing destination.",
+    "status": "not_started",
+    "evidence": "",
+    "notes": "",
+    "priority": "P1"
+  },
+  {
+    "id": "preserve-admin-capabilities",
+    "title": "Preserve complete SuperAdmin management capabilities",
+    "user_visible_behavior": "so that a SuperAdmin can manage users and companies without losing any control",
+    "verification_command": "Accepted when `/admin/dashboard`, `/admin/users`, and `/admin/companies` preserve all current filters, details, role/status/subscription actions, monitor linking, loading, empty, and error states.",
+    "status": "not_started",
+    "evidence": "",
+    "notes": "",
+    "priority": "P1"
+  },
+  {
+    "id": "operational-charts-replace-3d",
+    "title": "Use charts and exact status data instead of the 3D scene",
+    "user_visible_behavior": "so that an operator can identify trends, thresholds, and incidents quickly",
+    "verification_command": "Accepted when the factory overview contains fleet status, cycle/throughput, temperature/load, alert severity, robot comparison, and recent event context using real available data; missing history is stated honestly.",
+    "status": "not_started",
+    "evidence": "",
+    "notes": "",
+    "priority": "P1"
+  }
+]

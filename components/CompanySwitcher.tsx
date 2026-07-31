@@ -6,7 +6,6 @@ import {
     ChevronDown,
     Loader2,
     RefreshCw,
-    ShieldCheck,
     TriangleAlert,
 } from "lucide-react";
 import { useCompany } from "@/lib/company-context";
@@ -23,18 +22,11 @@ export function CompanySwitcher() {
         clearCompanyError,
     } = useCompany();
 
-    function handleSelection(
-        event: React.ChangeEvent<HTMLSelectElement>
-    ): void {
-        clearCompanyError();
-        selectCompany(event.target.value);
-    }
-
     if (isLoadingCompanies) {
         return (
-            <div className="flex h-9 min-w-40 items-center gap-2 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 text-xs text-[#64748B]">
-                <Loader2 className="h-3.5 w-3.5 animate-spin text-[#FD3E06]" />
-                Loading companies...
+            <div className="flex min-h-10 max-w-52 items-center gap-2 border border-line bg-canvas px-3 text-xs text-subtle">
+                <Loader2 className="size-3.5 animate-spin text-brand" />
+                Đang tải công ty…
             </div>
         );
     }
@@ -42,26 +34,18 @@ export function CompanySwitcher() {
     if (companyError) {
         return (
             <div className="flex items-center gap-2">
-                <div
-                    className="hidden max-w-52 items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 lg:flex"
-                    title={companyError}
-                >
-                    <TriangleAlert className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">
-                        Company unavailable
-                    </span>
+                <div className="hidden max-w-52 items-center gap-2 border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 lg:flex" title={companyError}>
+                    <TriangleAlert className="size-3.5 shrink-0" />
+                    <span className="truncate">Không thể tải công ty</span>
                 </div>
-
                 <button
                     type="button"
-                    onClick={() =>
-                        void refreshCompanies()
-                    }
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#E2E8F0] text-[#64748B] transition-colors hover:bg-[#F8FAFC] hover:text-[#FD3E06]"
-                    title="Retry loading companies"
-                    aria-label="Retry loading companies"
+                    onClick={() => void refreshCompanies()}
+                    className="inline-flex size-10 items-center justify-center rounded-md border border-line text-steel hover:border-brand/40 hover:text-brand"
+                    title="Tải lại danh sách công ty"
+                    aria-label="Tải lại danh sách công ty"
                 >
-                    <RefreshCw className="h-4 w-4" />
+                    <RefreshCw className="size-4" />
                 </button>
             </div>
         );
@@ -71,51 +55,39 @@ export function CompanySwitcher() {
         return (
             <Link
                 href="/dashboard/company"
-                className="inline-flex h-9 items-center gap-2 rounded-lg border border-dashed border-[#CBD5E1] px-3 text-xs font-medium text-[#64748B] transition-colors hover:border-[#FD3E06] hover:text-[#FD3E06]"
+                className="inline-flex min-h-10 items-center gap-2 rounded-md border border-dashed border-line px-3 text-xs font-medium text-steel hover:border-brand hover:text-brand"
             >
-                <Building2 className="h-4 w-4" />
-                Create company
+                <Building2 className="size-4" />
+                Tạo công ty
             </Link>
         );
     }
 
     return (
-        <div className="flex min-w-0 items-center gap-2">
-            <div className="hidden min-w-0 items-center gap-2 xl:flex">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#FD3E06]/10 text-[#FD3E06]">
-                    <Building2 className="h-4 w-4" />
-                </div>
-
-                <div className="min-w-0">
-                    <div className="max-w-36 truncate text-xs font-semibold text-[#0F172A]">
-                        {selectedCompany.name}
-                    </div>
-                    <div className="flex items-center gap-1 text-[10px] text-[#64748B]">
-                        <ShieldCheck className="h-2.5 w-2.5" />
-                        {selectedCompany.currentUserRole}
-                    </div>
-                </div>
+        <div className="flex min-w-0 items-center gap-3">
+            <div className="hidden size-9 shrink-0 items-center justify-center rounded-md bg-brand-soft text-brand md:flex">
+                <Building2 className="size-4" />
             </div>
-
-            <div className="relative">
+            <div className="relative min-w-0">
+                <label htmlFor="company-switcher" className="sr-only">
+                    Công ty đang chọn
+                </label>
                 <select
-                    aria-label="Selected company"
+                    id="company-switcher"
                     value={selectedCompanyId ?? ""}
-                    onChange={handleSelection}
-                    className="h-9 max-w-44 appearance-none rounded-lg border border-[#DCE3EC] bg-white py-0 pl-3 pr-8 text-xs font-medium text-[#334155] outline-none transition-colors hover:border-[#CBD5E1] focus:border-[#FD3E06] focus:ring-2 focus:ring-[#FD3E06]/10"
+                    onChange={(event) => {
+                        clearCompanyError();
+                        selectCompany(event.target.value);
+                    }}
+                    className="h-10 max-w-[58vw] appearance-none rounded-md border border-line bg-surface py-0 pl-3 pr-9 text-xs font-semibold text-ink outline-none hover:border-brand/40 focus:border-brand sm:max-w-64"
                 >
                     {companies.map((company) => (
-                        <option
-                            key={company.id}
-                            value={company.id}
-                        >
-                            {company.name} ·{" "}
-                            {company.currentUserRole}
+                        <option key={company.id} value={company.id}>
+                            {company.name} · {company.currentUserRole === "Owner" ? "Chủ sở hữu" : "Giám sát"}
                         </option>
                     ))}
                 </select>
-
-                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#94A3B8]" />
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-subtle" />
             </div>
         </div>
     );

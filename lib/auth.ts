@@ -107,10 +107,16 @@ export function getSession(): Session | null {
     }
 }
 
-export function setSession(session: Session): void {
+export function setSession(
+    session: Session,
+    notify = true
+): void {
     if (typeof window === "undefined") return;
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    window.dispatchEvent(new Event(SESSION_CHANGED_EVENT));
+
+    if (notify) {
+        window.dispatchEvent(new Event(SESSION_CHANGED_EVENT));
+    }
 }
 
 export function clearSession(): void {
@@ -175,7 +181,8 @@ function createSession(
 }
 
 export function storeAuthResponse(
-    auth: BackendAuthResponse
+    auth: BackendAuthResponse,
+    notify = true
 ): Session | null {
     if (
         !auth?.accessToken ||
@@ -187,7 +194,7 @@ export function storeAuthResponse(
     }
 
     const session = createSession(auth.user, auth);
-    setSession(session);
+    setSession(session, notify);
     return session;
 }
 

@@ -44,6 +44,11 @@ export interface RobotLatestState {
   collisionWarning: boolean | null;
   lastSeenAt: string | null;
   timestamp: string | null;
+  receivedAt?: string | null;
+  latencyMilliseconds?: number | null;
+  sequenceNumber?: number | null;
+  io?: unknown;
+  execution?: unknown;
   source: string;
 }
 
@@ -82,6 +87,9 @@ export interface RobotCommand {
   payload: any | null;
   status: string;
   createdAt: string;
+  completedAt?: string | null;
+  failureReason?: string | null;
+  result?: unknown;
 }
 
 export interface CreateRobotCommandInput {

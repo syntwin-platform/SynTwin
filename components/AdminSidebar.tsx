@@ -1,79 +1,37 @@
 "use client";
 
-import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ShieldCheck } from "lucide-react";
+import { adminNavItems } from "@/components/navigation/admin-nav";
+import { BrandMark } from "@/components/shared/BrandMark";
 import { cn } from "@/lib/utils";
-import {
-  LayoutDashboard,
-  Users,
-  ShieldCheck,
-  Building2
-} from "lucide-react";
-
-const navItems = [
-  { icon: LayoutDashboard, label: "Overview", href: "/admin/dashboard" },
-  { icon: Users, label: "User Management", href: "/admin/users" },
-  { icon: Building2, label: "Companies", href: "/admin/companies" },
-];
 
 export function AdminSidebar() {
-  const pathname = usePathname();
-
-  return (
-    <aside className="flex h-full w-16 flex-col items-center border-r border-[#1E293B] bg-[#0F172A] py-4 lg:w-56 lg:items-stretch">
-      {/* Logo */}
-      <Link href="/admin/dashboard" className="mb-8 flex flex-col items-center justify-center gap-1 px-4 transition-opacity hover:opacity-80 lg:flex-row">
-        <Image src="/images/syntwin-logo.png" alt="SynTwin" width={36} height={36} className="shrink-0" />
-        <div className="hidden lg:flex lg:flex-col lg:items-start">
-            <span className="text-sm font-bold tracking-wider text-[#FD3E06]">
-              SynTwin
-            </span>
-            <span className="text-[10px] uppercase font-bold text-[#94A3B8] tracking-widest flex items-center gap-1">
-              <ShieldCheck size={10} className="text-[#FD3E06]"/> Admin
-            </span>
-        </div>
-      </Link>
-
-      {/* Navigation */}
-      <nav className="flex flex-1 flex-col gap-1 px-2">
-        {navItems.map((item) => {
-           // simple active logic
-          const active = pathname.startsWith(item.href);
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              className={cn(
-                "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200",
-                active
-                  ? "bg-[#FD3E06]/10 text-[#FD3E06]"
-                  : "text-[#94A3B8] hover:bg-white/5 hover:text-[#CBD5E1]"
-              )}
-            >
-              <item.icon
-                className={cn(
-                  "h-5 w-5 shrink-0 transition-colors",
-                  active ? "text-[#FD3E06]" : "text-[#475569] group-hover:text-[#94A3B8]"
-                )}
-              />
-              <span className="hidden lg:block">{item.label}</span>
-              {active && (
-                <div className="ml-auto hidden h-1.5 w-1.5 rounded-full bg-[#FD3E06] lg:block" />
-              )}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* System Status */}
-      <div className="mt-auto border-t border-[#1E293B] px-3 pt-4">
-        <div className="flex items-center gap-2">
-          <div className="h-2 w-2 animate-pulse rounded-full bg-[#22C55E]" />
-          <span className="hidden text-xs text-[#94A3B8] lg:block">Platform Online</span>
-        </div>
-      </div>
-    </aside>
-  );
+    const pathname = usePathname();
+    return (
+        <aside className="flex h-full w-16 flex-col border-r border-line bg-surface py-4 lg:w-60">
+            <BrandMark href="/admin/dashboard" compact className="mx-auto mb-7 lg:hidden" />
+            <BrandMark href="/admin/dashboard" className="mb-1 hidden px-4 lg:inline-flex" />
+            <div className="mx-4 mb-7 hidden items-center gap-2 border-l-2 border-brand bg-brand-soft px-3 py-2 lg:flex">
+                <ShieldCheck className="size-4 text-brand" />
+                <span className="font-telemetry text-[10px] font-semibold uppercase tracking-[.14em] text-brand">Quản trị nền tảng</span>
+            </div>
+            <nav className="flex flex-1 flex-col gap-1 px-2" aria-label="Điều hướng quản trị">
+                {adminNavItems.map((item) => {
+                    const active = pathname.startsWith(item.href);
+                    return (
+                        <Link key={item.href} href={item.href} title={item.label} aria-current={active ? "page" : undefined} className={cn("relative flex min-h-11 items-center justify-center gap-3 rounded-md px-3 text-sm font-medium lg:justify-start", active ? "bg-brand-soft text-brand" : "text-steel hover:bg-canvas hover:text-ink")}>
+                            {active && <span className="absolute inset-y-2 left-0 w-0.5 bg-brand" />}
+                            <item.icon className="size-[18px]" />
+                            <span className="hidden lg:block">{item.label}</span>
+                        </Link>
+                    );
+                })}
+            </nav>
+            <p className="mx-4 hidden border-t border-line pt-4 text-xs leading-5 text-subtle lg:block">
+                Dữ liệu tổng hợp từ API quản trị người dùng và công ty.
+            </p>
+        </aside>
+    );
 }

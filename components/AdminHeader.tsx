@@ -1,64 +1,40 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, Search, ShieldAlert } from "lucide-react";
-import type { Session } from "@/lib/auth";
+import { LogOut, ShieldCheck } from "lucide-react";
 import { logoutUser } from "@/lib/api/auth";
+import type { Session } from "@/lib/auth";
 
-interface AdminHeaderProps {
-  session: Session;
-}
+export function AdminHeader({ session }: { session: Session }) {
+    const router = useRouter();
+    const [loggingOut, setLoggingOut] = useState(false);
 
-export function AdminHeader({ session }: AdminHeaderProps) {
-  const router = useRouter();
-  const [loggingOut, setLoggingOut] = useState(false);
+    async function handleLogout() {
+        if (loggingOut) return;
+        setLoggingOut(true);
+        await logoutUser();
+        router.replace("/login");
+        router.refresh();
+    }
 
-  async function handleLogout(): Promise<void> {
-    if (loggingOut) return;
-
-    setLoggingOut(true);
-    await logoutUser();
-    router.replace("/login");
-    router.refresh();
-  }
-
-  return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b border-[#E2E8F0] bg-white px-4 lg:px-6">
-      <div className="flex flex-1 items-center gap-4">
-        <h1 className="hidden text-lg font-bold text-[#0F172A] sm:block">
-          Admin Console
-        </h1>
-        <div className="relative hidden max-w-sm items-center md:flex">
-          <Search className="absolute left-3 h-4 w-4 text-[#94A3B8]" />
-          <input
-            type="text"
-            placeholder="Search users, factories..."
-            className="w-64 rounded-md border-none bg-[#F1F5F9] py-1.5 pl-9 pr-4 text-sm text-[#0F172A] outline-none transition-all placeholder:text-[#94A3B8] focus:ring-1 focus:ring-[#FD3E06]"
-          />
-        </div>
-      </div>
-
-      <div className="flex items-center gap-4 lg:gap-6">
-        <div className="flex flex-col items-end">
-          <span className="text-sm font-semibold text-[#0F172A]">
-            {session.name}
-          </span>
-          <span className="flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-[#FD3E06]">
-            <ShieldAlert size={10} /> Admin
-          </span>
-        </div>
-        <div className="h-8 w-px bg-[#E2E8F0]" />
-        <button
-          type="button"
-          onClick={handleLogout}
-          disabled={loggingOut}
-          className="flex items-center gap-2 text-sm font-medium text-[#64748B] transition-colors hover:text-[#FD3E06] disabled:cursor-wait disabled:opacity-50"
-        >
-          <LogOut size={16} />
-          <span className="hidden sm:inline">Logout</span>
-        </button>
-      </div>
-    </header>
-  );
+    return (
+        <header className="flex min-h-16 items-center justify-between border-b border-line bg-surface px-4 sm:px-5">
+            <div className="flex items-center gap-2 text-steel">
+                <ShieldCheck className="size-4 text-brand" />
+                <span className="text-sm font-semibold text-ink">Bảng quản trị</span>
+                <span className="hidden font-telemetry text-[10px] uppercase tracking-[.12em] text-subtle sm:inline">SuperAdmin</span>
+            </div>
+            <div className="flex items-center gap-3 border-l border-line pl-3">
+                <div className="hidden text-right sm:block">
+                    <p className="max-w-48 truncate text-xs font-semibold text-ink">{session.name || session.email}</p>
+                    <p className="mt-0.5 text-[10px] text-subtle">{session.email}</p>
+                </div>
+                <button type="button" onClick={() => void handleLogout()} disabled={loggingOut} aria-label="Đăng xuất" className="inline-flex min-h-10 items-center gap-2 rounded-md border border-line px-3 text-xs font-semibold text-steel hover:border-danger/30 hover:text-danger disabled:opacity-50">
+                    <LogOut className="size-4" />
+                    <span className="hidden sm:inline">Đăng xuất</span>
+                </button>
+            </div>
+        </header>
+    );
 }

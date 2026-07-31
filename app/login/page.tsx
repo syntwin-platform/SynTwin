@@ -1,469 +1,362 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+    Activity,
     ArrowRight,
     CheckCircle2,
+    Cpu,
     Eye,
     EyeOff,
     KeyRound,
+    Layers,
     LockKeyhole,
     Mail,
+    ShieldCheck,
 } from "lucide-react";
+import { BrandMark } from "@/components/shared/BrandMark";
+import { FeedbackBanner } from "@/components/shared/FeedbackBanner";
 import {
     confirmLoginCode,
     loginUser,
     requestLoginCode,
     storeAuthenticatedSession,
 } from "@/lib/api/auth";
+import { getPostLoginDestination } from "@/lib/access-policy";
 import type { Session } from "@/lib/auth";
 
-type LoginMode = "password" | "emailCode";
-
-function BrandMark({ size = "large" }: { size?: "small" | "large" }) {
-    const dimensions =
-        size === "large" ? "h-[88px] w-[88px]" : "h-11 w-11";
-
-    return (
-        <span
-            className={`relative inline-flex shrink-0 overflow-hidden rounded-2xl border border-orange-100 bg-gradient-to-br from-white via-orange-50 to-orange-100 shadow-[0_12px_30px_rgba(253,62,6,0.16)] ${dimensions}`}
-            aria-label="SynTwin logo"
-            role="img"
-        >
-            <span
-                className="absolute inset-0 bg-no-repeat"
-                style={{
-                    backgroundImage: "url('/images/syntwin-logo.png')",
-                    backgroundPosition: "64% 49%",
-                    backgroundSize: "205% auto",
-                }}
-            />
-        </span>
-    );
-}
+type Mode = "password" | "code";
 
 export default function LoginPage() {
     const router = useRouter();
-    const [mode, setMode] = useState<LoginMode>("password");
+    const [mode, setMode] = useState<Mode>("password");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [code, setCode] = useState("");
     const [codeSent, setCodeSent] = useState(false);
+    const [secondsLeft, setSecondsLeft] = useState(0);
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
 
-    function redirectAfterLogin(session: Session): void {
-        router.push(session.isAdmin ? "/admin/dashboard" : "/dashboard");
+    useEffect(() => {
+        if (secondsLeft <= 0) return;
+        const timer = window.setInterval(
+            () => setSecondsLeft((value) => Math.max(0, value - 1)),
+            1000
+        );
+        return () => window.clearInterval(timer);
+    }, [secondsLeft]);
+
+    function finish(session: Session) {
+        const requested = new URLSearchParams(window.location.search).get("next");
+        router.replace(getPostLoginDestination(session, requested));
         router.refresh();
     }
 
-    function changeMode(nextMode: LoginMode): void {
+    function switchMode(nextMode: Mode) {
+        if (loading || nextMode === mode) return;
         setMode(nextMode);
         setError("");
         setMessage("");
         setCode("");
         setCodeSent(false);
+        setSecondsLeft(0);
     }
 
-    async function handlePasswordLogin(): Promise<void> {
-        if (!email.trim() || !password) {
-            setError("Please enter your email and password.");
-            return;
-        }
-
-        setLoading(true);
-
-        try {
-            const auth = await loginUser(email, password);
-            redirectAfterLogin(storeAuthenticatedSession(auth));
-        } catch (requestError) {
-            setError(getErrorMessage(requestError));
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    async function sendLoginCode(): Promise<void> {
-        if (!email.trim()) {
-            setError("Please enter your email address.");
-            return;
-        }
-
-        setError("");
-        setMessage("");
-        setLoading(true);
-
-        try {
-            const result = await requestLoginCode(email);
-            setCodeSent(true);
-            setMessage(
-                result.message ||
-                    "If the email exists, a login code has been sent."
-            );
-        } catch (requestError) {
-            setError(getErrorMessage(requestError));
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    async function handleCodeLogin(): Promise<void> {
-        if (!/^\d{6}$/.test(code)) {
-            setError("Please enter the 6-digit code from your email.");
-            return;
-        }
-
-        setError("");
-        setLoading(true);
-
-        try {
-            const auth = await confirmLoginCode(email, code);
-            redirectAfterLogin(storeAuthenticatedSession(auth));
-        } catch (requestError) {
-            setError(getErrorMessage(requestError));
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    async function handleSubmit(
-        event: React.FormEvent<HTMLFormElement>
-    ): Promise<void> {
+    async function submit(event: React.FormEvent) {
         event.preventDefault();
         setError("");
         setMessage("");
 
-        if (mode === "password") {
-            await handlePasswordLogin();
+        if (!email.trim()) {
+            setError("Vui lòng nhập địa chỉ email.");
             return;
         }
 
-        if (codeSent) {
-            await handleCodeLogin();
-            return;
+        setLoading(true);
+        try {
+            if (mode === "password") {
+                if (!password) throw new Error("Vui lòng nhập mật khẩu.");
+                finish(storeAuthenticatedSession(await loginUser(email, password)));
+            } else if (!codeSent) {
+                const result = await requestLoginCode(email);
+                setCodeSent(true);
+                setSecondsLeft(60);
+                setMessage(
+                    result.message || "Nếu email tồn tại, mã đăng nhập đã được gửi."
+                );
+            } else {
+                if (!/^\d{6}$/.test(code))
+                    throw new Error("Mã đăng nhập phải gồm đúng 6 chữ số.");
+                finish(
+                    storeAuthenticatedSession(await confirmLoginCode(email, code))
+                );
+            }
+        } catch (requestError) {
+            setError(
+                requestError instanceof Error
+                    ? requestError.message
+                    : "Không thể đăng nhập. Vui lòng thử lại."
+            );
+        } finally {
+            setLoading(false);
         }
+    }
 
-        await sendLoginCode();
+    async function resendCode() {
+        if (secondsLeft > 0 || !email.trim()) return;
+        setLoading(true);
+        setError("");
+        try {
+            const result = await requestLoginCode(email);
+            setSecondsLeft(60);
+            setMessage(result.message || "Mã mới đã được gửi.");
+        } catch (requestError) {
+            setError(
+                requestError instanceof Error
+                    ? requestError.message
+                    : "Không thể gửi lại mã."
+            );
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
-        <div className="relative min-h-screen overflow-hidden bg-[#F8FAFC]">
-            <div className="pointer-events-none absolute inset-0">
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(15,23,42,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.035)_1px,transparent_1px)] bg-[size:60px_60px]" />
-                <div className="absolute left-1/2 top-10 h-72 w-72 -translate-x-1/2 rounded-full bg-[#FD3E06]/10 blur-3xl" />
-            </div>
+        <main className="grid min-h-screen bg-canvas lg:grid-cols-[.9fr_1.1fr]">
+            {/* Left — Form */}
+            <section className="flex flex-col border-r border-line bg-surface px-5 py-6 sm:px-10 lg:px-14">
+                <BrandMark />
+                <div className="mx-auto my-auto w-full max-w-md py-12">
+                    <p className="font-telemetry text-xs font-semibold uppercase tracking-[.16em] text-brand">
+                        Truy cập không gian vận hành
+                    </p>
+                    <h1 className="mt-3 text-3xl font-semibold tracking-tight text-ink">
+                        Đăng nhập SynTwin
+                    </h1>
+                    <p className="mt-2 text-sm leading-6 text-steel">
+                        Tiếp tục bằng mật khẩu hoặc mã dùng một lần gửi qua email.
+                    </p>
 
-            <nav className="relative z-10 border-b border-[#E2E8F0]/80 bg-white/90 backdrop-blur">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 sm:px-6">
-                    <Link href="/" className="flex items-center gap-3">
-                        <BrandMark size="small" />
-                        <div>
-                            <span className="block text-base font-bold tracking-wide text-[#0F172A]">
-                                SynTwin
-                            </span>
-                            <span className="block text-[10px] uppercase tracking-[0.18em] text-[#94A3B8]">
-                                Industrial Digital Twin
-                            </span>
-                        </div>
-                    </Link>
-
-                    <div className="flex items-center gap-3">
-                        <span className="hidden text-sm text-[#64748B] sm:inline">
-                            New to SynTwin?
-                        </span>
-                        <Link
-                            href="/register"
-                            className="rounded-lg bg-[#FD3E06] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#E63600]"
+                    <div className="mt-7 grid grid-cols-2 gap-px rounded-md bg-line p-px">
+                        <button
+                            type="button"
+                            aria-pressed={mode === "password"}
+                            disabled={loading}
+                            onClick={() => switchMode("password")}
+                            className={`min-h-11 rounded-[5px] text-sm font-medium transition disabled:opacity-60 ${
+                                mode === "password"
+                                    ? "bg-surface text-ink shadow-sm"
+                                    : "bg-canvas text-subtle hover:text-ink"
+                            }`}
                         >
-                            Create Account
-                        </Link>
+                            <LockKeyhole className="mr-2 inline size-4 text-brand" />
+                            Mật khẩu
+                        </button>
+                        <button
+                            type="button"
+                            aria-pressed={mode === "code"}
+                            disabled={loading}
+                            onClick={() => switchMode("code")}
+                            className={`min-h-11 rounded-[5px] text-sm font-medium transition disabled:opacity-60 ${
+                                mode === "code"
+                                    ? "bg-surface text-ink shadow-sm"
+                                    : "bg-canvas text-subtle hover:text-ink"
+                            }`}
+                        >
+                            <Mail className="mr-2 inline size-4 text-brand" />
+                            Mã email
+                        </button>
                     </div>
-                </div>
-            </nav>
 
-            <main className="relative z-10 flex min-h-[calc(100vh-69px)] items-center justify-center px-4 py-8 sm:py-10">
-                <div className="w-full max-w-[520px]">
-                    <div className="mb-5 flex justify-center">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-[#FD3E06]/20 bg-white/80 px-4 py-1.5 shadow-sm backdrop-blur">
-                            <span className="h-2 w-2 animate-pulse rounded-full bg-[#FD3E06]" />
-                            <span className="text-xs font-medium text-[#FD3E06]">
-                                Real-time Industrial Monitoring
+                    <div className="mt-5 space-y-3">
+                        {error && <FeedbackBanner tone="error">{error}</FeedbackBanner>}
+                        {message && <FeedbackBanner tone="success">{message}</FeedbackBanner>}
+                    </div>
+
+                    <form onSubmit={submit} className="mt-5 space-y-4">
+                        <label className="block text-sm font-medium text-steel">
+                            Email công việc
+                            <span className="relative mt-1.5 block">
+                                <Mail className="absolute left-3 top-3.5 size-4 text-subtle" />
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    disabled={loading || codeSent}
+                                    autoComplete="email"
+                                    placeholder="ban@congty.vn"
+                                    className="h-11 w-full rounded-md border border-line bg-surface pl-10 pr-3 text-sm outline-none transition focus:border-brand"
+                                />
                             </span>
-                        </div>
-                    </div>
+                        </label>
 
-                    <section className="rounded-3xl border border-[#E2E8F0] bg-white/95 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.12)] backdrop-blur sm:p-8">
-                        <header className="mb-6 text-center">
-                            <BrandMark />
-                            <h1 className="mt-4 text-2xl font-bold tracking-tight text-[#0F172A]">
-                                Welcome back
-                            </h1>
-                            <p className="mt-1.5 text-sm text-[#64748B]">
-                                Sign in securely to your SynTwin workspace
-                            </p>
-                        </header>
-
-                        <div className="mb-5 grid grid-cols-2 gap-1 rounded-xl bg-[#F1F5F9] p-1">
-                            <button
-                                type="button"
-                                onClick={() => changeMode("password")}
-                                disabled={loading}
-                                className={`flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-medium transition-all ${
-                                    mode === "password"
-                                        ? "bg-white text-[#0F172A] shadow-sm"
-                                        : "text-[#64748B] hover:text-[#334155]"
-                                }`}
-                            >
-                                <LockKeyhole className="h-4 w-4" />
-                                Password
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => changeMode("emailCode")}
-                                disabled={loading}
-                                className={`flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-medium transition-all ${
-                                    mode === "emailCode"
-                                        ? "bg-white text-[#0F172A] shadow-sm"
-                                        : "text-[#64748B] hover:text-[#334155]"
-                                }`}
-                            >
-                                <Mail className="h-4 w-4" />
-                                Email code
-                            </button>
-                        </div>
-
-                        {error && (
-                            <div
-                                role="alert"
-                                className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs leading-relaxed text-red-700"
-                            >
-                                {error}
-                            </div>
-                        )}
-
-                        {message && (
-                            <div
-                                role="status"
-                                className="mb-4 flex gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs leading-relaxed text-emerald-700"
-                            >
-                                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-                                <span>{message}</span>
-                            </div>
-                        )}
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label
-                                    htmlFor="email"
-                                    className="mb-1.5 block text-xs font-semibold text-[#334155]"
-                                >
-                                    Email address
-                                </label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
+                        {mode === "password" ? (
+                            <label className="block text-sm font-medium text-steel">
+                                Mật khẩu
+                                <span className="relative mt-1.5 block">
+                                    <LockKeyhole className="absolute left-3 top-3.5 size-4 text-subtle" />
                                     <input
-                                        id="email"
-                                        type="email"
-                                        value={email}
-                                        onChange={(event) =>
-                                            setEmail(event.target.value)
-                                        }
-                                        placeholder="you@company.com"
-                                        autoComplete="email"
-                                        disabled={loading || codeSent}
-                                        className="h-12 w-full rounded-xl border border-[#DCE3EC] bg-white pl-10 pr-3 text-sm text-[#0F172A] outline-none transition focus:border-[#FD3E06] focus:ring-4 focus:ring-[#FD3E06]/10 disabled:cursor-not-allowed disabled:bg-[#F8FAFC] disabled:text-[#64748B]"
+                                        type={showPassword ? "text" : "password"}
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        autoComplete="current-password"
+                                        className="h-11 w-full rounded-md border border-line bg-surface pl-10 pr-11 text-sm outline-none transition focus:border-brand"
                                     />
-                                </div>
-                            </div>
-
-                            {mode === "password" ? (
-                                <>
-                                    <div>
-                                        <label
-                                            htmlFor="password"
-                                            className="mb-1.5 block text-xs font-semibold text-[#334155]"
-                                        >
-                                            Password
-                                        </label>
-                                        <div className="relative">
-                                            <LockKeyhole className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
-                                            <input
-                                                id="password"
-                                                type={
-                                                    showPassword
-                                                        ? "text"
-                                                        : "password"
-                                                }
-                                                value={password}
-                                                onChange={(event) =>
-                                                    setPassword(
-                                                        event.target.value
-                                                    )
-                                                }
-                                                placeholder="Enter your password"
-                                                autoComplete="current-password"
-                                                disabled={loading}
-                                                className="h-12 w-full rounded-xl border border-[#DCE3EC] bg-white pl-10 pr-11 text-sm text-[#0F172A] outline-none transition focus:border-[#FD3E06] focus:ring-4 focus:ring-[#FD3E06]/10 disabled:cursor-not-allowed disabled:opacity-60"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    setShowPassword(
-                                                        (current) => !current
-                                                    )
-                                                }
-                                                disabled={loading}
-                                                aria-label={
-                                                    showPassword
-                                                        ? "Hide password"
-                                                        : "Show password"
-                                                }
-                                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8] transition-colors hover:text-[#334155]"
-                                            >
-                                                {showPassword ? (
-                                                    <EyeOff className="h-4 w-4" />
-                                                ) : (
-                                                    <Eye className="h-4 w-4" />
-                                                )}
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center justify-between">
-                                        <label className="flex items-center gap-2 text-xs text-[#64748B]">
-                                            <input
-                                                type="checkbox"
-                                                defaultChecked
-                                                className="h-3.5 w-3.5 rounded border-[#CBD5E1] accent-[#FD3E06]"
-                                            />
-                                            Remember me
-                                        </label>
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                changeMode("emailCode")
-                                            }
-                                            className="text-xs font-medium text-[#FD3E06] hover:text-[#E63600]"
-                                        >
-                                            Sign in without password
-                                        </button>
-                                    </div>
-                                </>
-                            ) : codeSent ? (
-                                <div>
-                                    <div className="mb-1.5 flex items-center justify-between">
-                                        <label
-                                            htmlFor="login-code"
-                                            className="text-xs font-semibold text-[#334155]"
-                                        >
-                                            6-digit login code
-                                        </label>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setCodeSent(false);
-                                                setCode("");
-                                                setMessage("");
-                                                setError("");
-                                            }}
-                                            disabled={loading}
-                                            className="text-xs font-medium text-[#FD3E06] hover:text-[#E63600]"
-                                        >
-                                            Change email
-                                        </button>
-                                    </div>
-                                    <div className="relative">
-                                        <KeyRound className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
-                                        <input
-                                            id="login-code"
-                                            type="text"
-                                            inputMode="numeric"
-                                            pattern="[0-9]{6}"
-                                            maxLength={6}
-                                            value={code}
-                                            onChange={(event) =>
-                                                setCode(
-                                                    event.target.value
-                                                        .replace(/\D/g, "")
-                                                        .slice(0, 6)
-                                                )
-                                            }
-                                            placeholder="000000"
-                                            autoComplete="one-time-code"
-                                            autoFocus
-                                            disabled={loading}
-                                            className="h-14 w-full rounded-xl border border-[#DCE3EC] bg-white pl-11 pr-4 text-center font-mono text-xl font-semibold tracking-[0.45em] text-[#0F172A] outline-none transition placeholder:tracking-[0.45em] placeholder:text-[#CBD5E1] focus:border-[#FD3E06] focus:ring-4 focus:ring-[#FD3E06]/10"
-                                        />
-                                    </div>
                                     <button
                                         type="button"
-                                        onClick={sendLoginCode}
-                                        disabled={loading}
-                                        className="mt-2 text-xs font-medium text-[#64748B] hover:text-[#FD3E06]"
+                                        onClick={() => setShowPassword((v) => !v)}
+                                        aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                                        className="absolute right-2 top-1 inline-flex size-9 items-center justify-center text-subtle hover:text-ink"
                                     >
-                                        Send a new code
+                                        {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                                     </button>
-                                </div>
-                            ) : (
-                                <div className="rounded-xl border border-[#FED7C9] bg-[#FFF7F3] px-4 py-3 text-xs leading-relaxed text-[#9A3412]">
-                                    We will send a one-time 6-digit code to your
-                                    email. No password is required.
-                                </div>
-                            )}
+                                </span>
+                            </label>
+                        ) : codeSent ? (
+                            <label className="block text-sm font-medium text-steel">
+                                Mã đăng nhập 6 chữ số
+                                <input
+                                    inputMode="numeric"
+                                    value={code}
+                                    onChange={(e) =>
+                                        setCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+                                    }
+                                    className="mt-1.5 h-12 w-full rounded-md border border-line bg-surface text-center font-telemetry text-xl tracking-[.45em] outline-none transition focus:border-brand"
+                                />
+                            </label>
+                        ) : null}
 
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-brand px-5 text-sm font-semibold text-white transition hover:bg-brand-hover hover:shadow-lg hover:shadow-brand/20 disabled:opacity-60"
+                        >
+                            {loading
+                                ? "Đang xử lý…"
+                                : mode === "password"
+                                  ? "Đăng nhập"
+                                  : codeSent
+                                    ? "Xác nhận mã"
+                                    : "Gửi mã đăng nhập"}
+                            <ArrowRight className="size-4" />
+                        </button>
+                    </form>
+
+                    {mode === "code" && codeSent && (
+                        <div className="mt-4 flex items-center justify-center gap-4 text-xs text-subtle">
                             <button
-                                type="submit"
-                                disabled={loading}
-                                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#FD3E06] text-sm font-semibold text-white shadow-lg shadow-[#FD3E06]/20 transition-all hover:-translate-y-0.5 hover:bg-[#E63600] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                                type="button"
+                                disabled={secondsLeft > 0 || loading}
+                                onClick={() => void resendCode()}
+                                className="min-h-11 font-medium text-brand disabled:text-subtle"
                             >
-                                {loading ? (
-                                    <>
-                                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                                        Please wait...
-                                    </>
-                                ) : (
-                                    <>
-                                        {mode === "password"
-                                            ? "Sign in"
-                                            : codeSent
-                                              ? "Verify and sign in"
-                                              : "Send login code"}
-                                        <ArrowRight className="h-4 w-4" />
-                                    </>
-                                )}
+                                {secondsLeft > 0
+                                    ? `Gửi lại sau ${secondsLeft}s`
+                                    : "Gửi lại mã"}
                             </button>
-                        </form>
-
-                        <div className="mt-5 border-t border-[#E2E8F0] pt-5 text-center">
-                            <p className="text-xs text-[#64748B]">
-                                Don&apos;t have an account?{" "}
-                                <Link
-                                    href="/register"
-                                    className="font-semibold text-[#FD3E06] hover:text-[#E63600] hover:underline"
-                                >
-                                    Create one
-                                </Link>
-                            </p>
+                            <button
+                                type="button"
+                                disabled={loading}
+                                onClick={() => {
+                                    setCode("");
+                                    setCodeSent(false);
+                                    setSecondsLeft(0);
+                                    setMessage("");
+                                }}
+                                className="min-h-11 font-medium text-steel hover:text-ink disabled:opacity-60"
+                            >
+                                Đổi email
+                            </button>
                         </div>
-                    </section>
+                    )}
 
-                    <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[10px] text-[#94A3B8]">
-                        <span>Secure JWT authentication</span>
-                        <span>Email code expires in 10 minutes</span>
-                        <span>Role-based access</span>
+                    <p className="mt-6 text-center text-sm text-subtle">
+                        Chưa có tài khoản?{" "}
+                        <Link
+                            href="/register"
+                            className="font-semibold text-brand hover:text-brand-hover"
+                        >
+                            Tạo tài khoản Free
+                        </Link>
+                    </p>
+                </div>
+            </section>
+
+            {/* Right Side Showcase — Light Modern High-Tech Aesthetics */}
+            <aside className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-[#FFF7F4] via-[#F8FAFC] to-[#F1F5F9] p-12 lg:flex">
+                <div className="technical-grid absolute inset-0 opacity-25 pointer-events-none" />
+                <div className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-brand/5 blur-3xl" />
+
+                {/* Top status bar */}
+                <div className="relative z-10 flex items-center justify-between">
+                    <div className="flex items-center gap-2 rounded-full border border-line bg-surface/80 px-3 py-1.5 shadow-sm backdrop-blur">
+                        <span className="animate-pulse-dot size-2 rounded-full bg-emerald-500" />
+                        <span className="font-telemetry text-xs font-medium text-steel">
+                            Hệ thống vận hành: Hoạt động 99.9%
+                        </span>
+                    </div>
+                    <span className="font-telemetry text-xs font-semibold uppercase tracking-[0.16em] text-brand">
+                        SynTwin Platform
+                    </span>
+                </div>
+
+                {/* Center Content */}
+                <div className="relative z-10 my-auto max-w-lg py-8">
+                    <div className="inline-flex size-12 items-center justify-center rounded-xl border border-brand/20 bg-brand/10 text-brand shadow-sm">
+                        <KeyRound className="size-6" />
+                    </div>
+
+                    <h2 className="mt-6 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+                        Một tài khoản, đúng không gian vận hành.
+                    </h2>
+                    <p className="mt-4 text-base leading-7 text-steel">
+                        Phân tách rõ ràng giữa môi trường trải nghiệm Demo mô phỏng, không gian dữ liệu thật dành cho doanh nghiệp và khu vực quản trị SuperAdmin.
+                    </p>
+
+                    {/* Interactive feature cards */}
+                    <div className="mt-8 space-y-3">
+                        <div className="flex items-start gap-3.5 rounded-xl border border-line bg-surface/90 p-4 shadow-sm backdrop-blur transition hover:border-brand/30">
+                            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-line bg-canvas text-brand">
+                                <ShieldCheck className="size-4" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-semibold text-ink">Xác thực vai trò tự động</p>
+                                <p className="mt-0.5 text-xs text-steel">
+                                    Đưa bạn đến chính xác bảng điều khiển theo gói đăng ký (Free, Basic, Premium).
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start gap-3.5 rounded-xl border border-line bg-surface/90 p-4 shadow-sm backdrop-blur transition hover:border-brand/30">
+                            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-line bg-canvas text-brand">
+                                <Activity className="size-4" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-semibold text-ink">Telemetry thời gian thực</p>
+                                <p className="mt-0.5 text-xs text-steel">
+                                    Theo dõi thông số robot, nhiệt độ, độ trễ và cảnh báo tức thời.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </main>
-        </div>
-    );
-}
 
-function getErrorMessage(error: unknown): string {
-    return error instanceof Error
-        ? error.message
-        : "Authentication failed. Please try again.";
+                {/* Bottom footer badge */}
+                <div className="relative z-10 flex items-center justify-between border-t border-line/60 pt-6">
+                    <p className="text-xs text-subtle">
+                        Dữ liệu vận hành được bảo mật theo tiêu chuẩn công nghiệp.
+                    </p>
+                    <div className="flex items-center gap-1.5 font-telemetry text-xs font-semibold text-steel">
+                        <Cpu className="size-3.5 text-brand" />
+                        <span>v1.0.1</span>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    );
 }

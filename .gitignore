@@ -10,6 +10,11 @@
 # production
 /build
 
+# test artifacts
+/playwright-report/
+/test-results/
+/coverage/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
@@ -25,3 +30,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# installer binaries (place manually on server, do not commit)
+/public/downloads/*.exe
+/public/downloads/*.dmg
+/public/downloads/*.AppImage
+/public/downloads/*.deb
+/public/downloads/*.snap

@@ -1,83 +1,80 @@
 "use client";
 
-import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard,
-  Factory,
-  Bot,
-  AlertTriangle,
-  BarChart3,
-  Settings,
-  Building2,
+    AlertTriangle,
+    BarChart3,
+    Bot,
+    Building2,
+    Download,
+    LayoutDashboard,
+    UserRound,
 } from "lucide-react";
+import { BrandMark } from "@/components/shared/BrandMark";
+import { cn } from "@/lib/utils";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-  { icon: Factory, label: "Factory View", href: "/dashboard" },
-  { icon: Building2, label: "Company", href: "/dashboard/company" },
-  { icon: Bot, label: "Robot Management", href: "/dashboard/robots" },
-  { icon: AlertTriangle, label: "Alerts", href: "/dashboard/alerts" },
-  { icon: BarChart3, label: "Analytics", href: "/dashboard/analytics" },
-  { icon: Settings, label: "Settings", href: "/dashboard/user" },
-];
+    { icon: LayoutDashboard, label: "Tổng quan", href: "/dashboard" },
+    { icon: Bot, label: "Robot", href: "/dashboard/robots" },
+    { icon: AlertTriangle, label: "Cảnh báo", href: "/dashboard/alerts" },
+    { icon: BarChart3, label: "Phân tích", href: "/dashboard/analytics" },
+    { icon: Building2, label: "Công ty", href: "/dashboard/company" },
+    { icon: Download, label: "Tải phần mềm", href: "/dashboard/downloads" },
+    { icon: UserRound, label: "Tài khoản", href: "/dashboard/user" },
+] as const;
 
 export function Sidebar() {
-  const pathname = usePathname();
+    const pathname = usePathname();
 
-  return (
-    <aside className="flex h-full w-16 flex-col items-center border-r border-[#1E293B] bg-[#0F172A] py-4 lg:w-56 lg:items-stretch">
-      {/* Logo */}
-      <Link href="/dashboard" className="mb-8 flex items-center justify-center gap-2 px-4 transition-opacity hover:opacity-80">
-        <Image src="/images/syntwin-logo.png" alt="SynTwin" width={36} height={36} className="shrink-0" />
-        <span className="hidden text-sm font-bold tracking-wider text-[#FD3E06] lg:block">
-          SynTwin
-        </span>
-      </Link>
+    return (
+        <aside className="flex h-full w-16 flex-col border-r border-line bg-surface py-4 lg:w-60">
+            <BrandMark
+                href="/dashboard"
+                compact
+                className="mx-auto mb-7 lg:hidden"
+            />
+            <BrandMark
+                href="/dashboard"
+                className="mb-7 hidden px-4 lg:inline-flex"
+            />
+            <p className="mb-2 hidden px-5 font-telemetry text-[10px] font-semibold uppercase tracking-[.16em] text-subtle lg:block">
+                Điều hướng vận hành
+            </p>
+            <nav className="flex flex-1 flex-col gap-1 px-2" aria-label="Điều hướng chính">
+                {navItems.map((item) => {
+                    const active =
+                        item.href === "/dashboard"
+                            ? pathname === "/dashboard"
+                            : pathname.startsWith(item.href);
 
-      {/* Navigation */}
-      <nav className="flex flex-1 flex-col gap-1 px-2">
-        {navItems.map((item) => {
-          const active =
-            item.href === "/dashboard"
-              ? pathname === "/dashboard"
-              : pathname.startsWith(item.href);
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              className={cn(
-                "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200",
-                active
-                  ? "bg-[#FD3E06]/10 text-[#FD3E06]"
-                  : "text-[#94A3B8] hover:bg-white/5 hover:text-[#CBD5E1]"
-              )}
-            >
-              <item.icon
-                className={cn(
-                  "h-5 w-5 shrink-0 transition-colors",
-                  active ? "text-[#FD3E06]" : "text-[#475569] group-hover:text-[#94A3B8]"
-                )}
-              />
-              <span className="hidden lg:block">{item.label}</span>
-              {active && (
-                <div className="ml-auto hidden h-1.5 w-1.5 rounded-full bg-[#FD3E06] lg:block" />
-              )}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* System Status */}
-      <div className="mt-auto border-t border-[#1E293B] px-3 pt-4">
-        <div className="flex items-center gap-2">
-          <div className="h-2 w-2 animate-pulse rounded-full bg-[#22C55E]" />
-          <span className="hidden text-xs text-[#94A3B8] lg:block">System Online</span>
-        </div>
-      </div>
-    </aside>
-  );
+                    return (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            aria-current={active ? "page" : undefined}
+                            title={item.label}
+                            className={cn(
+                                "group relative flex min-h-11 items-center justify-center gap-3 rounded-md px-3 text-sm font-medium transition-colors lg:justify-start",
+                                active
+                                    ? "bg-brand-soft text-brand"
+                                    : "text-steel hover:bg-canvas hover:text-ink"
+                            )}
+                        >
+                            {active && (
+                                <span className="absolute inset-y-2 left-0 w-0.5 bg-brand" />
+                            )}
+                            <item.icon className="size-[18px] shrink-0" />
+                            <span className="hidden lg:block">{item.label}</span>
+                        </Link>
+                    );
+                })}
+            </nav>
+            <div className="mx-3 hidden border-t border-line pt-4 lg:block">
+                <p className="text-xs leading-5 text-subtle">
+                    Dữ liệu hiển thị theo công ty đang chọn và quyền của tài khoản.
+                </p>
+            </div>
+        </aside>
+    );
 }

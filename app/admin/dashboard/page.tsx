@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import {
   Activity,
   Building2,
@@ -19,8 +18,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { AdminHeader } from "@/components/AdminHeader";
-import { AdminSidebar } from "@/components/AdminSidebar";
+import { AdminShell } from "@/components/shell/AdminShell";
+import { SourceContext } from "@/components/shared/SourceContext";
 import { useSession } from "@/hooks/useSession";
 import {
   adminGetDashboardMetrics,
@@ -78,22 +77,16 @@ export default function AdminDashboardPage() {
   if (!session) return null;
 
   return (
-    <div className="flex h-[100dvh] w-screen overflow-hidden bg-[#F1F5F9]">
-      <div className="hidden sm:flex">
-        <AdminSidebar />
-      </div>
-
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <AdminHeader session={session} />
-
+    <AdminShell session={session}>
         <main className="flex-1 overflow-y-auto p-4 pb-20 lg:p-8">
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-[#0F172A]">
-                Platform Overview
+              <p className="font-telemetry text-[11px] font-semibold uppercase tracking-[.16em] text-brand">Tổng hợp quản trị</p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">
+                Tổng quan nền tảng
               </h1>
               <p className="mt-1 text-sm text-[#64748B]">
-                Live platform totals from the admin user and company APIs.
+                Số liệu tổng hợp từ các API quản trị người dùng và công ty.
               </p>
             </div>
             <button
@@ -107,7 +100,7 @@ export default function AdminDashboardPage() {
               ) : (
                 <RefreshCw size={14} />
               )}
-              Refresh data
+              Làm mới dữ liệu
             </button>
           </div>
 
@@ -123,7 +116,7 @@ export default function AdminDashboardPage() {
                   onClick={() => void loadMetrics()}
                   className="font-semibold underline underline-offset-2"
                 >
-                  Try again
+                  Thử lại
                 </button>
               </div>
             </div>
@@ -134,29 +127,29 @@ export default function AdminDashboardPage() {
               role="status"
               className="flex min-h-72 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-sm text-[#64748B]"
             >
-              <Loader2 className="mr-2 h-5 w-5 animate-spin text-[#FD3E06]" />
-              Loading admin metrics…
+              <Loader2 className="mr-2 h-5 w-5 animate-spin text-[#C52F00]" />
+              Đang tải số liệu quản trị…
             </div>
           ) : metrics ? (
             <>
               <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <KpiCard
-                  title="Total Users"
+                  title="Tổng người dùng"
                   value={metrics.totalUsers.toLocaleString()}
                   icon={<Users size={20} className="text-[#3B82F6]" />}
                 />
                 <KpiCard
-                  title="Active Accounts"
+                  title="Tài khoản hoạt động"
                   value={metrics.activeUsers.toLocaleString()}
                   icon={<Activity size={20} className="text-[#10B981]" />}
                 />
                 <KpiCard
-                  title="Companies"
+                  title="Công ty"
                   value={metrics.totalCompanies.toLocaleString()}
                   icon={<Building2 size={20} className="text-[#8B5CF6]" />}
                 />
                 <KpiCard
-                  title="Linked Monitors"
+                  title="Tài khoản giám sát"
                   value={metrics.linkedMonitors.toLocaleString()}
                   icon={<UserSearch size={20} className="text-[#F59E0B]" />}
                 />
@@ -164,40 +157,23 @@ export default function AdminDashboardPage() {
 
               <div className="grid gap-4 lg:grid-cols-2">
                 <MetricChart
-                  title="Subscription Distribution"
+                  title="Phân bổ gói dịch vụ"
                   data={metrics.usersByPlan}
-                  color="#FD3E06"
+                  color="#C52F00"
                 />
                 <MetricChart
-                  title="Account Status"
+                  title="Trạng thái tài khoản"
                   data={metrics.usersByStatus}
                   color="#475569"
                 />
               </div>
+              <div className="mt-5">
+                <SourceContext source="API quản trị người dùng và công ty" scope="Dữ liệu được tổng hợp từ nhiều yêu cầu API; thời điểm có thể khác nhau" />
+              </div>
             </>
           ) : null}
         </main>
-      </div>
-
-      <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-14 items-center justify-around border-t border-[#E2E8F0] bg-white sm:hidden">
-        {[
-          { href: "/admin/dashboard", icon: "📊", label: "Overview" },
-          { href: "/admin/users", icon: "👥", label: "Users" },
-          { href: "/admin/companies", icon: "🏢", label: "Companies" },
-        ].map(({ href, icon, label }) => (
-          <Link
-            key={href}
-            href={href}
-            className="flex flex-col items-center gap-0.5 px-3 py-1"
-          >
-            <span className="text-lg leading-none">{icon}</span>
-            <span className="text-[9px] font-medium text-[#64748B]">
-              {label}
-            </span>
-          </Link>
-        ))}
-      </nav>
-    </div>
+    </AdminShell>
   );
 }
 
@@ -211,7 +187,7 @@ function KpiCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
+    <div className="border border-line bg-surface p-5">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-medium text-[#64748B]">{title}</h2>
         <div className="rounded-lg bg-[#F8FAFC] p-2">{icon}</div>
@@ -231,7 +207,7 @@ function MetricChart({
   color: string;
 }) {
   return (
-    <section className="flex min-h-[340px] flex-col rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
+    <section aria-label={title} className="flex min-h-[340px] flex-col border border-line bg-surface p-5">
       <h2 className="mb-4 text-lg font-semibold text-[#0F172A]">
         {title}
       </h2>
@@ -267,16 +243,27 @@ function MetricChart({
                 boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
               }}
             />
-            <Bar dataKey="count" fill={color} radius={[4, 4, 0, 0]} />
+            <Bar isAnimationActive={false} dataKey="count" fill={color} radius={[2, 2, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
+      <p className="mt-4 text-xs text-subtle">
+        {data.map((item) => `${formatMetricName(item.name)}: ${item.count}`).join("; ")}
+      </p>
     </section>
   );
+}
+
+function formatMetricName(name: string): string {
+  return {
+    Active: "Hoạt động",
+    Locked: "Bị khóa",
+    Deleted: "Đã xóa",
+  }[name] ?? name;
 }
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error
     ? error.message
-    : "Unable to load admin dashboard data.";
+    : "Không thể tải dữ liệu tổng quan quản trị.";
 }

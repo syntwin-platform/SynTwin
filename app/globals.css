@@ -9,50 +9,62 @@ html {
 }
 
 :root {
-  /* SynTwin Industrial Tech Design Tokens */
-  --primary: #FD3E06;
-  --primary-hover: #E63600;
-  --background: #F9FAFA;
-  --foreground: #0F172A;
+  /* SynTwin industrial-minimal semantic tokens, AA contrast */
+  --canvas: #F9FAFA;
+  --surface: #FFFFFF;
+  --ink: #0F172A;
+  --steel: #334155;
+  --subtle: #64748B;
+  --line: #E2E8F0;
+  --brand: #C52F00;
+  --brand-hover: #9F2600;
+  --focus: #2563EB;
 
-  --card: #FFFFFF;
-  --card-foreground: #0F172A;
-  --popover: #FFFFFF;
-  --popover-foreground: #0F172A;
+  --primary: var(--brand);
+  --primary-hover: var(--brand-hover);
+  --background: var(--canvas);
+  --foreground: var(--ink);
+
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
   --primary-foreground: #FFFFFF;
   --secondary: #F1F5F9;
-  --secondary-foreground: #334155;
+  --secondary-foreground: var(--steel);
   --muted: #F1F5F9;
-  --muted-foreground: #64748B;
+  --muted-foreground: var(--subtle);
   --accent: #F1F5F9;
-  --accent-foreground: #0F172A;
+  --accent-foreground: var(--ink);
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
-  --border: #E2E8F0;
-  --input: #E2E8F0;
-  --ring: #FD3E06;
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--focus);
 
-  --chart-1: #FD3E06;
-  --chart-2: #22C55E;
-  --chart-3: #FACC15;
-  --chart-4: #3B82F6;
+  --chart-1: #C52F00;
+  --chart-2: #2563EB;
+  --chart-3: #22C55E;
+  --chart-4: #F59E0B;
   --chart-5: #8B5CF6;
 
-  --radius: 0.75rem;
+  --radius: 0.5rem;
+  --space-unit: 0.25rem;
 
   --sidebar: #0F172A;
   --sidebar-foreground: #CBD5E1;
-  --sidebar-primary: #FD3E06;
+  --sidebar-primary: #C52F00;
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent: rgba(253, 62, 6, 0.15);
-  --sidebar-accent-foreground: #FD3E06;
+  --sidebar-accent-foreground: #C52F00;
   --sidebar-border: #1E293B;
-  --sidebar-ring: #FD3E06;
+  --sidebar-ring: #C52F00;
 
-  /* Status */
-  --success: #22C55E;
-  --warning: #FACC15;
-  --danger: #EF4444;
+  /* Accessible operational status palette */
+  --success: #15803D;
+  --warning: #A16207;
+  --danger: #B91C1C;
+  --info: #1D4ED8;
 
   /* Neutrals */
   --gray-900: #0F172A;
@@ -84,6 +96,18 @@ html {
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-steel: var(--steel);
+  --color-subtle: var(--subtle);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -108,6 +132,179 @@ html {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    min-width: 320px;
+    font-variant-numeric: tabular-nums;
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--brand) 18%, transparent);
+    color: var(--ink);
   }
 }
+
+@layer utilities {
+  .font-telemetry {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .technical-grid {
+    background-image:
+      linear-gradient(to right, color-mix(in srgb, var(--line) 55%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in srgb, var(--line) 55%, transparent) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* ─── Scroll-reveal animations (outside @layer for correct specificity) ─── */
+
+.reveal-up {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-up.is-visible,
+.is-visible .reveal-up {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-fade {
+  opacity: 0;
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-fade.is-visible,
+.is-visible .reveal-fade {
+  opacity: 1;
+}
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-32px);
+  transition:
+    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-left.is-visible,
+.is-visible .reveal-left {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(32px);
+  transition:
+    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-right.is-visible,
+.is-visible .reveal-right {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.94);
+  transition:
+    opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-scale.is-visible,
+.is-visible .reveal-scale {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Animated underline for section labels */
+.brand-label {
+  display: inline-block;
+  position: relative;
+}
+.brand-label::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--brand);
+  border-radius: 2px;
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.3s;
+}
+.is-visible .brand-label::after,
+.brand-label.is-visible::after {
+  width: 100%;
+}
+
+/* Hover lift effect for cards */
+.card-hover {
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s ease;
+}
+.card-hover:hover {
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.09);
+  border-color: color-mix(in srgb, var(--brand) 30%, var(--line));
+}
+/* Only lift when already visible (not during initial reveal) */
+.card-hover.is-visible:hover,
+.is-visible .card-hover:hover {
+  transform: translateY(-4px);
+}
+
+/* Pulsing status dot */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.55; transform: scale(1.35); }
+}
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* Hero bar chart animated fill */
+@keyframes bar-rise {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+.bar-animate {
+  transform-origin: bottom;
+  animation: bar-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Gradient shimmer */
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.shimmer-line {
+  background: linear-gradient(90deg, var(--line) 0%, color-mix(in srgb, var(--brand) 20%, var(--line)) 50%, var(--line) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+

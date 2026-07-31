@@ -1,8 +1,9 @@
-import { AuthGuard } from "@/components/AuthGuard";
-import { CompanyProvider } from "@/lib/company-context";
+import { Suspense } from "react";
+import { AccessBoundary } from "@/components/auth/AccessBoundary";
+import { AccessLoading } from "@/components/auth/AccessLoading";
 
 export const metadata = {
-    title: "SynTwin - Factory Dashboard",
+    title: "SynTwin — Vận hành nhà máy",
 };
 
 export default function DashboardLayout({
@@ -11,10 +12,8 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     return (
-        <AuthGuard>
-            <CompanyProvider>
-                {children}
-            </CompanyProvider>
-        </AuthGuard>
+        <Suspense fallback={<AccessLoading />}>
+            <AccessBoundary>{children}</AccessBoundary>
+        </Suspense>
     );
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
     ArrowRight,
     Bot,
@@ -23,6 +23,7 @@ import {
     type SubscriptionPlan,
 } from "@/lib/api/subscriptions";
 import type { BackendSubscriptionPlan } from "@/lib/auth";
+import { formatRobotLimit } from "@/lib/display-labels";
 import { useSession } from "@/hooks/useSession";
 
 const PLAN_ORDER: Record<BackendSubscriptionPlan, number> = {
@@ -65,14 +66,16 @@ function getPlanDescription(
 }
 
 function getPlanFeatures(plan: SubscriptionPlan): string[] {
-    const robotLimit =
-        plan.maxRobots === 1
-            ? "Quản lý tối đa 1 robot"
-            : `Quản lý tối đa ${plan.maxRobots} robot`;
+    if (plan.code === "Free") {
+        return [
+            "Bảng điều khiển demo với dữ liệu mô phỏng",
+            "Trải nghiệm cố định và chỉ đọc",
+            "Không truy cập dữ liệu robot thật",
+            "Nâng cấp để dùng không gian vận hành",
+        ];
+    }
 
-    const view3D = plan.canView3D
-        ? "Xem mô hình Digital Twin 3D"
-        : "Giám sát trạng thái robot cơ bản";
+    const robotLimit = formatRobotLimit(plan.maxRobots);
 
     const sendCommand = plan.canSendCommand
         ? "Gửi lệnh điều khiển robot"
@@ -84,7 +87,7 @@ function getPlanFeatures(plan: SubscriptionPlan): string[] {
 
     return [
         robotLimit,
-        view3D,
+        "Bảng trạng thái và biểu đồ vận hành",
         sendCommand,
         auditRetention,
     ];
@@ -96,7 +99,7 @@ function PlanIcon({
     plan: BackendSubscriptionPlan;
 }) {
     if (plan === "Premium") {
-        return <Crown className="h-6 w-6 text-[#FD3E06]" />;
+        return <Crown className="h-6 w-6 text-[#C52F00]" />;
     }
 
     if (plan === "Basic") {
@@ -108,7 +111,14 @@ function PlanIcon({
 
 export default function PricingPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const session = useSession();
+    const requestedPlan = searchParams.get("plan");
+    const selectedPlan =
+        requestedPlan === "Basic" ||
+        requestedPlan === "Premium"
+            ? requestedPlan
+            : null;
 
     const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
     const [isLoadingPlans, setIsLoadingPlans] = useState(true);
@@ -164,6 +174,22 @@ export default function PricingPage() {
     async function handleCheckout(
         plan: PaidSubscriptionPlan
     ): Promise<void> {
+        if (session?.isAdmin) {
+            setError(
+                "Tài khoản quản trị chỉ có quyền xem bảng giá và không thể thực hiện thanh toán."
+            );
+            return;
+        }
+
+        if (!session) {
+            window.location.assign(
+                `/login?next=${encodeURIComponent(
+                    `/pricing?plan=${plan}`
+                )}`
+            );
+            return;
+        }
+
         setCheckoutPlan(plan);
         setError("");
 
@@ -172,7 +198,7 @@ export default function PricingPage() {
 
             if (!checkout.paymentUrl) {
                 throw new Error(
-                    "Backend không trả về đường dẫn thanh toán VNPay."
+                    "Hệ thống không trả về đường dẫn thanh toán VNPay."
                 );
             }
 
@@ -192,10 +218,6 @@ export default function PricingPage() {
         router.replace("/login");
     }
 
-    if (!session) {
-        return null;
-    }
-
     return (
         <div className="relative min-h-screen bg-[#F8FAFC]">
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(15,23,42,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.03)_1px,transparent_1px)] bg-[size:60px_60px]" />
@@ -203,7 +225,16 @@ export default function PricingPage() {
             <nav className="relative z-10 border-b border-[#E2E8F0] bg-white">
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
                     <Link
-                        href="/dashboard"
+                        href={
+                            session
+                                ? session.isAdmin
+                                    ? "/admin/dashboard"
+                                    : session.subscriptionPlan ===
+                                        "Free"
+                                      ? "/dashboard/demo"
+                                      : "/dashboard"
+                                : "/"
+                        }
                         className="flex items-center gap-2.5"
                     >
                         <Image
@@ -217,45 +248,53 @@ export default function PricingPage() {
                         </span>
                     </Link>
 
+                    {session ? (
                     <div className="flex items-center gap-4">
                         <div className="hidden text-right sm:block">
                             <p className="text-sm font-medium text-[#0F172A]">
-                                {session.name}
+                                {session?.name ?? "Khách"}
                             </p>
                             <p className="text-xs text-[#64748B]">
                                 Gói hiện tại:{" "}
-                                {session.subscriptionPlan}
+                                {session?.subscriptionPlan ??
+                                    "Chưa đăng nhập"}
                             </p>
                         </div>
 
                         <button
                             type="button"
                             onClick={() => void handleLogout()}
-                            className="flex items-center gap-2 rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm font-medium text-[#64748B] transition hover:border-[#FD3E06]/40 hover:text-[#FD3E06]"
+                            className="flex items-center gap-2 rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm font-medium text-[#64748B] transition hover:border-[#C52F00]/40 hover:text-[#C52F00]"
                         >
                             <LogOut className="h-4 w-4" />
                             Đăng xuất
                         </button>
                     </div>
+                    ) : (
+                        <div className="flex items-center gap-2">
+                            <Link href="/login" className="inline-flex min-h-11 items-center px-3 text-sm font-medium text-steel">Đăng nhập</Link>
+                            <Link href="/register" className="inline-flex min-h-11 items-center rounded-md bg-brand px-4 text-sm font-semibold text-white">Tạo tài khoản</Link>
+                        </div>
+                    )}
                 </div>
             </nav>
 
             <main className="relative z-10 mx-auto max-w-7xl px-6 py-16">
                 <div className="text-center">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-[#FD3E06]/20 bg-[#FD3E06]/5 px-4 py-1.5">
-                        <span className="h-2 w-2 rounded-full bg-[#FD3E06]" />
-                        <span className="text-xs font-medium text-[#FD3E06]">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-[#C52F00]/20 bg-[#C52F00]/5 px-4 py-1.5">
+                        <span className="h-2 w-2 rounded-full bg-[#C52F00]" />
+                        <span className="text-xs font-medium text-[#C52F00]">
                             Gói dịch vụ SynTwin
                         </span>
                     </div>
 
                     <h1 className="mt-5 text-3xl font-bold text-[#0F172A] sm:text-4xl">
-                        Chọn gói phù hợp với nhà máy
+                        Bảng giá SynTwin cho nhà máy
                     </h1>
 
                     <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-[#64748B]">
                         Danh sách gói và mức giá được tải trực tiếp
-                        từ Backend. Thanh toán các gói trả phí được
+                        từ hệ thống. Thanh toán các gói trả phí được
                         xử lý qua VNPay.
                     </p>
                 </div>
@@ -271,12 +310,12 @@ export default function PricingPage() {
 
                 {isLoadingPlans ? (
                     <div className="flex min-h-72 items-center justify-center">
-                        <Loader2 className="h-8 w-8 animate-spin text-[#FD3E06]" />
+                        <Loader2 className="h-8 w-8 animate-spin text-[#C52F00]" />
                     </div>
                 ) : plans.length === 0 ? (
                     <div className="mt-12 rounded-2xl border border-[#E2E8F0] bg-white p-10 text-center">
                         <p className="text-sm text-[#64748B]">
-                            Backend chưa trả về gói dịch vụ nào.
+                            Hệ thống chưa trả về gói dịch vụ nào.
                         </p>
                     </div>
                 ) : (
@@ -284,8 +323,10 @@ export default function PricingPage() {
                         {plans.map((plan) => {
                             const isPremium =
                                 plan.code === "Premium";
+                            const isSelected =
+                                plan.code === selectedPlan;
                             const isCurrent =
-                                session.subscriptionPlan ===
+                                session?.subscriptionPlan ===
                                 plan.code;
                             const paidPlan = isPaidPlan(plan.code)
                                 ? plan.code
@@ -298,14 +339,24 @@ export default function PricingPage() {
                             return (
                                 <article
                                     key={plan.id}
+                                    data-selected={
+                                        isSelected || undefined
+                                    }
                                     className={`relative flex flex-col rounded-2xl bg-white p-8 ${
-                                        isPremium
-                                            ? "border-2 border-[#FD3E06]/50 shadow-xl shadow-[#FD3E06]/10"
+                                        isSelected
+                                            ? "border-2 border-[#C52F00] shadow-xl shadow-[#C52F00]/10 ring-4 ring-[#C52F00]/10"
+                                            : isPremium
+                                            ? "border-2 border-[#C52F00]/50 shadow-xl shadow-[#C52F00]/10"
                                             : "border border-[#E2E8F0] shadow-lg shadow-black/5"
                                     }`}
                                 >
+                                    {isSelected && (
+                                        <span className="absolute right-4 top-4 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-orange-700">
+                                            Gói bạn đã chọn
+                                        </span>
+                                    )}
                                     {isPremium && (
-                                        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#FD3E06] px-4 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
+                                        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#C52F00] px-4 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
                                             Đầy đủ tính năng
                                         </span>
                                     )}
@@ -313,7 +364,7 @@ export default function PricingPage() {
                                     <div
                                         className={`mb-5 flex h-12 w-12 items-center justify-center rounded-xl ${
                                             isPremium
-                                                ? "bg-[#FD3E06]/10"
+                                                ? "bg-[#C52F00]/10"
                                                 : plan.code ===
                                                     "Basic"
                                                   ? "bg-[#3B82F6]/10"
@@ -377,6 +428,7 @@ export default function PricingPage() {
                                         disabled={
                                             isCurrent ||
                                             !paidPlan ||
+                                            session?.isAdmin ||
                                             checkoutPlan !== null
                                         }
                                         onClick={() => {
@@ -388,11 +440,13 @@ export default function PricingPage() {
                                         }}
                                         className={`flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
                                             isPremium
-                                                ? "bg-[#FD3E06] text-white hover:bg-[#E63600]"
-                                                : "border-2 border-[#3B82F6] text-[#3B82F6] hover:bg-[#3B82F6] hover:text-white"
+                                                ? "bg-[#C52F00] text-white hover:bg-[#9F2600]"
+                                                : "border-2 border-[#1D4ED8] text-[#1D4ED8] hover:bg-[#1D4ED8] hover:text-white"
                                         }`}
                                     >
-                                        {isCheckingOut ? (
+                                        {session?.isAdmin && paidPlan ? (
+                                            "Chỉ xem"
+                                        ) : isCheckingOut ? (
                                             <>
                                                 <Loader2 className="h-4 w-4 animate-spin" />
                                                 Đang chuyển đến VNPay
@@ -414,8 +468,8 @@ export default function PricingPage() {
                     </div>
                 )}
 
-                <p className="mt-10 text-center text-xs text-[#94A3B8]">
-                    Giao dịch chỉ được ghi nhận sau khi Backend xác
+                <p className="mt-10 text-center text-xs text-[#475569]">
+                    Giao dịch chỉ được ghi nhận sau khi hệ thống xác
                     minh kết quả trả về từ VNPay.
                 </p>
             </main>

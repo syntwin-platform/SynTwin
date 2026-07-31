@@ -1,5 +1,4 @@
 import {
-    clearSession,
     getAccessToken,
     getSession,
     storeAuthResponse,
@@ -9,6 +8,7 @@ import {
     ApiRequestError,
     type ApiErrorResponse,
 } from "@/lib/api/types";
+import { redirectExpiredSession } from "@/lib/auth-redirect";
 
 const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5000";
@@ -192,14 +192,7 @@ async function performRefresh(): Promise<boolean> {
 }
 
 function handleExpiredSession(): void {
-    clearSession();
-
-    if (
-        typeof window !== "undefined" &&
-        window.location.pathname !== "/login"
-    ) {
-        window.location.replace("/login");
-    }
+    redirectExpiredSession();
 }
 
 async function parseResponseBody(

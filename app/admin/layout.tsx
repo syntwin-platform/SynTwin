@@ -1,7 +1,9 @@
-import { AuthGuard } from "@/components/AuthGuard";
+import { Suspense } from "react";
+import { AccessBoundary } from "@/components/auth/AccessBoundary";
+import { AccessLoading } from "@/components/auth/AccessLoading";
 
 export const metadata = {
-  title: "SynTwin - Admin Dashboard",
+  title: "SynTwin — Quản trị hệ thống",
 };
 
 export default function AdminLayout({
@@ -10,8 +12,8 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthGuard requireAdmin>
-      {children}
-    </AuthGuard>
+    <Suspense fallback={<AccessLoading />}>
+      <AccessBoundary>{children}</AccessBoundary>
+    </Suspense>
   );
 }

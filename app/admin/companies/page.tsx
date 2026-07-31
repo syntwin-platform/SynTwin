@@ -11,8 +11,7 @@ import {
     UserPlus,
     Users,
 } from "lucide-react";
-import { AdminHeader } from "@/components/AdminHeader";
-import { AdminSidebar } from "@/components/AdminSidebar";
+import { AdminShell } from "@/components/shell/AdminShell";
 import { useSession } from "@/hooks/useSession";
 import {
     adminAddCompanyMonitor,
@@ -36,6 +35,8 @@ export default function AdminCompaniesPage() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [pendingRemoval, setPendingRemoval] =
+        useState<AdminCompanyMember | null>(null);
 
     const selectedCompany = useMemo(
         () =>
@@ -146,7 +147,7 @@ export default function AdminCompaniesPage() {
                 )
             );
             setNewMonitorEmail("");
-            setSuccess("Monitoring account was linked.");
+            setSuccess("Tài khoản giám sát đã được liên kết.");
         } catch (requestError) {
             setError(getErrorMessage(requestError));
         } finally {
@@ -183,7 +184,7 @@ export default function AdminCompaniesPage() {
                 next[replacement.userId] = replacement.email;
                 return next;
             });
-            setSuccess("Linked email was replaced.");
+            setSuccess("Email liên kết đã được thay thế.");
         } catch (requestError) {
             setError(getErrorMessage(requestError));
         } finally {
@@ -195,11 +196,6 @@ export default function AdminCompaniesPage() {
         monitor: AdminCompanyMember
     ): Promise<void> {
         if (!selectedCompany) return;
-
-        const confirmed = window.confirm(
-            `Remove ${monitor.email} from ${selectedCompany.name}?`
-        );
-        if (!confirmed) return;
 
         setSaving(true);
         setError("");
@@ -226,7 +222,8 @@ export default function AdminCompaniesPage() {
                         : company
                 )
             );
-            setSuccess("Monitoring account was removed.");
+            setSuccess("Tài khoản giám sát đã được gỡ.");
+            setPendingRemoval(null);
         } catch (requestError) {
             setError(getErrorMessage(requestError));
         } finally {
@@ -237,25 +234,17 @@ export default function AdminCompaniesPage() {
     if (!session) return null;
 
     return (
-        <div className="flex h-[100dvh] w-screen overflow-hidden bg-[#F1F5F9]">
-            <div className="hidden sm:flex">
-                <AdminSidebar />
-            </div>
-
-            <div className="flex flex-1 flex-col overflow-hidden">
-                <AdminHeader session={session} />
-
+        <AdminShell session={session}>
                 <main className="flex-1 overflow-y-auto p-4 pb-20 lg:p-8">
                     <div className="mx-auto max-w-7xl">
                         <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                             <div>
                                 <h1 className="flex items-center gap-2 text-2xl font-bold text-[#0F172A]">
-                                    <Building2 className="h-6 w-6 text-[#FD3E06]" />
-                                    Company access management
+                                    <Building2 className="h-6 w-6 text-[#C52F00]" />
+                                    Quản lý quyền truy cập công ty
                                 </h1>
                                 <p className="mt-1 text-sm text-[#64748B]">
-                                    SuperAdmin controls linked monitoring
-                                    accounts for every company.
+                                    SuperAdmin quản lý các tài khoản giám sát được liên kết cho từng công ty.
                                 </p>
                             </div>
 
@@ -264,14 +253,14 @@ export default function AdminCompaniesPage() {
                                 className="flex gap-2"
                             >
                                 <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
+                                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#475569]" />
                                     <input
                                         value={search}
                                         onChange={(event) =>
                                             setSearch(event.target.value)
                                         }
-                                        placeholder="Company or owner email"
-                                        className="h-10 w-64 rounded-lg border border-[#DCE3EC] bg-white pl-9 pr-3 text-sm outline-none focus:border-[#FD3E06]"
+                                        placeholder="Công ty hoặc email chủ sở hữu"
+                                        className="h-10 w-64 rounded-lg border border-[#DCE3EC] bg-white pl-9 pr-3 text-sm outline-none focus:border-[#C52F00]"
                                     />
                                 </div>
                                 <button
@@ -279,7 +268,7 @@ export default function AdminCompaniesPage() {
                                     className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#DCE3EC] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#F8FAFC]"
                                 >
                                     <RefreshCw className="h-4 w-4" />
-                                    Load
+                                    Tải
                                 </button>
                             </form>
                         </div>
@@ -298,8 +287,8 @@ export default function AdminCompaniesPage() {
 
                         <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
                             <aside className="rounded-xl border border-[#E2E8F0] bg-white p-3 shadow-sm">
-                                <div className="mb-2 px-2 py-1 text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">
-                                    Companies ({companies.length})
+                                <div className="mb-2 px-2 py-1 text-xs font-semibold uppercase tracking-wider text-[#475569]">
+                                    Công ty ({companies.length})
                                 </div>
                                 <div className="space-y-1">
                                     {companies.map((company) => (
@@ -311,21 +300,21 @@ export default function AdminCompaniesPage() {
                                             }
                                             className={`w-full rounded-lg px-3 py-3 text-left ${
                                                 selectedCompanyId === company.id
-                                                    ? "bg-[#FD3E06]/10"
+                                                    ? "bg-[#C52F00]/10"
                                                     : "hover:bg-[#F8FAFC]"
                                             }`}
                                         >
                                             <div className="truncate text-sm font-semibold text-[#0F172A]">
                                                 {company.name}
                                             </div>
-                                            <div className="mt-1 truncate text-xs text-[#64748B]">
-                                                Owner:{" "}
+                                            <div className="mt-1 truncate text-xs text-[#475569]">
+                                                Chủ sở hữu:{" "}
                                                 {company.ownerEmail ||
-                                                    "Not assigned"}
+                                                    "Chưa chỉ định"}
                                             </div>
-                                            <div className="mt-1 flex items-center gap-1 text-xs text-[#94A3B8]">
+                                            <div className="mt-1 flex items-center gap-1 text-xs text-[#475569]">
                                                 <Users className="h-3 w-3" />
-                                                {company.monitorCount} monitors
+                                                {company.monitorCount} giám sát
                                             </div>
                                         </button>
                                     ))}
@@ -338,16 +327,16 @@ export default function AdminCompaniesPage() {
                                         <div>
                                             <h2 className="text-lg font-semibold text-[#0F172A]">
                                                 {selectedCompany?.name ??
-                                                    "Select a company"}
+                                                    "Chọn một công ty"}
                                             </h2>
                                             {owner && (
                                                 <p className="mt-1 text-xs text-[#64748B]">
-                                                    Owner: {owner.email}
+                                                    Chủ sở hữu: {owner.email}
                                                 </p>
                                             )}
                                         </div>
                                         {loading && (
-                                            <Loader2 className="h-5 w-5 animate-spin text-[#FD3E06]" />
+                                            <Loader2 className="h-5 w-5 animate-spin text-[#C52F00]" />
                                         )}
                                     </div>
 
@@ -358,6 +347,7 @@ export default function AdminCompaniesPage() {
                                         >
                                             <input
                                                 type="email"
+                                                aria-label="Email tài khoản giám sát mới"
                                                 required
                                                 value={newMonitorEmail}
                                                 onChange={(event) =>
@@ -366,15 +356,15 @@ export default function AdminCompaniesPage() {
                                                     )
                                                 }
                                                 placeholder="monitor@company.com"
-                                                className="h-10 flex-1 rounded-lg border border-[#DCE3EC] px-3 text-sm outline-none focus:border-[#FD3E06]"
+                                                className="h-10 flex-1 rounded-lg border border-[#DCE3EC] px-3 text-sm outline-none focus:border-[#C52F00]"
                                             />
                                             <button
                                                 type="submit"
                                                 disabled={saving}
-                                                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#FD3E06] px-4 text-sm font-semibold text-white hover:bg-[#E63600] disabled:opacity-60"
+                                                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#C52F00] px-4 text-sm font-semibold text-white hover:bg-[#9F2600] disabled:opacity-60"
                                             >
                                                 <UserPlus className="h-4 w-4" />
-                                                Link monitor
+                                                Liên kết tài khoản
                                             </button>
                                         </form>
                                     )}
@@ -385,13 +375,13 @@ export default function AdminCompaniesPage() {
                                         <thead className="bg-[#F8FAFC] text-xs uppercase tracking-wider text-[#64748B]">
                                             <tr>
                                                 <th className="px-5 py-3">
-                                                    Account
+                                                    Tài khoản
                                                 </th>
                                                 <th className="px-5 py-3">
-                                                    Linked email
+                                                    Email liên kết
                                                 </th>
                                                 <th className="px-5 py-3 text-right">
-                                                    Actions
+                                                    Thao tác
                                                 </th>
                                             </tr>
                                         </thead>
@@ -404,12 +394,13 @@ export default function AdminCompaniesPage() {
                                                                 monitor.email}
                                                         </div>
                                                         <div className="text-xs text-blue-600">
-                                                            Monitor
+                                                            Giám sát
                                                         </div>
                                                     </td>
                                                     <td className="px-5 py-4">
                                                         <input
                                                             type="email"
+                                                            aria-label={`Email liên kết của ${monitor.fullName ?? monitor.email}`}
                                                             value={
                                                                 editedEmails[
                                                                     monitor
@@ -430,7 +421,7 @@ export default function AdminCompaniesPage() {
                                                                     })
                                                                 )
                                                             }
-                                                            className="h-9 w-full min-w-64 rounded-lg border border-[#DCE3EC] px-3 text-sm outline-none focus:border-[#FD3E06]"
+                                                            className="h-9 w-full min-w-64 rounded-lg border border-[#DCE3EC] px-3 text-sm outline-none focus:border-[#C52F00]"
                                                         />
                                                     </td>
                                                     <td className="px-5 py-4">
@@ -452,18 +443,15 @@ export default function AdminCompaniesPage() {
                                                                 }
                                                                 className="rounded-md bg-[#0F172A] px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
                                                             >
-                                                                Save email
+                                                                Lưu email
                                                             </button>
                                                             <button
                                                                 type="button"
                                                                 disabled={saving}
-                                                                onClick={() =>
-                                                                    void removeMonitor(
-                                                                        monitor
-                                                                    )
-                                                                }
-                                                                title="Remove linked account"
-                                                                className="rounded-md p-2 text-[#94A3B8] hover:bg-red-50 hover:text-red-600"
+                                                                onClick={() => setPendingRemoval(monitor)}
+                                                                title="Gỡ tài khoản liên kết"
+                                                                aria-label={`Gỡ tài khoản giám sát ${monitor.fullName ?? monitor.email}`}
+                                                                className="rounded-md p-2 text-[#475569] hover:bg-red-50 hover:text-red-600"
                                                             >
                                                                 <Trash2 className="h-4 w-4" />
                                                             </button>
@@ -478,10 +466,9 @@ export default function AdminCompaniesPage() {
                                                     <tr>
                                                         <td
                                                             colSpan={3}
-                                                            className="px-5 py-10 text-center text-sm text-[#94A3B8]"
+                                                            className="px-5 py-10 text-center text-sm text-[#475569]"
                                                         >
-                                                            No monitoring
-                                                            account is linked.
+                                                            Chưa liên kết tài khoản giám sát.
                                                         </td>
                                                     </tr>
                                                 )}
@@ -490,10 +477,21 @@ export default function AdminCompaniesPage() {
                                 </div>
                             </section>
                         </div>
+                        {pendingRemoval && selectedCompany && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="presentation">
+                                <div role="alertdialog" aria-modal="true" aria-labelledby="remove-monitor-title" className="w-full max-w-md rounded-md border border-line bg-surface p-6 shadow-2xl">
+                                    <h2 id="remove-monitor-title" className="text-lg font-semibold text-ink">Gỡ tài khoản giám sát</h2>
+                                    <p className="mt-3 text-sm leading-6 text-steel">Gỡ <strong>{editedEmails[pendingRemoval.userId] ?? pendingRemoval.email}</strong> khỏi {selectedCompany.name}? Tài khoản sẽ mất quyền truy cập công ty.</p>
+                                    <div className="mt-6 flex justify-end gap-2">
+                                        <button type="button" disabled={saving} onClick={() => setPendingRemoval(null)} className="min-h-11 rounded-md border border-line px-4 text-sm font-semibold text-steel">Hủy</button>
+                                        <button type="button" disabled={saving} onClick={() => void removeMonitor(pendingRemoval)} className="min-h-11 rounded-md bg-danger px-4 text-sm font-semibold text-white disabled:opacity-60">Xác nhận gỡ</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </main>
-            </div>
-        </div>
+        </AdminShell>
     );
 }
 
@@ -516,5 +514,5 @@ function Notice({
 function getErrorMessage(error: unknown): string {
     return error instanceof Error
         ? error.message
-        : "An unexpected admin company request error occurred.";
+        : "Đã xảy ra lỗi khi xử lý công ty.";
 }

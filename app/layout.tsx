@@ -7,9 +7,9 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains" })
 
 export const metadata: Metadata = {
-  title: "SynTwin — Industrial Digital Twin Platform",
+  title: "SynTwin — Giám sát vận hành robot công nghiệp",
   description:
-    "Monitor and control industrial robot arms in your smart factory with real-time 3D Digital Twin visualization.",
+    "Nền tảng giám sát đội robot, telemetry và quyền truy cập nhà máy trên một giao diện thống nhất.",
   icons: {
     icon: "/images/syntwin-logo.png",
   },
@@ -21,8 +21,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased bg-[#F9FAFA] text-[#0F172A]`}>
+    <html lang="vi" data-scroll-behavior="smooth">
+      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased bg-canvas text-ink`}>
         {children}
       </body>
     </html>

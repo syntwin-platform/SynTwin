@@ -16,7 +16,7 @@ import { apiRequest } from "@/lib/api/client";
 export interface DeviceTelemetryInput {
   /** Góc các khớp robot (đơn vị: độ) */
   jointAngles?: number[];
-  /** TCP pose trong không gian 3D */
+  /** TCP pose trong hệ tọa độ robot */
   tcpPose?: {
     x: number;
     y: number;

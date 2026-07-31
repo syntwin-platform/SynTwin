@@ -1,42 +1,51 @@
 "use client";
 
-import React from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+    AlertTriangle,
+    BarChart3,
+    Bot,
+    Download,
+    LayoutDashboard,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [
-    { href: "/dashboard", icon: "🏭", label: "Factory" },
-    { href: "/dashboard/robots", icon: "🤖", label: "Robots" },
-    { href: "/dashboard/alerts", icon: "⚠️", label: "Alerts" },
-    { href: "/dashboard/analytics", icon: "📊", label: "Analytics" },
-];
+const navItems = [
+    { href: "/dashboard", icon: LayoutDashboard, label: "Tổng quan" },
+    { href: "/dashboard/robots", icon: Bot, label: "Robot" },
+    { href: "/dashboard/alerts", icon: AlertTriangle, label: "Cảnh báo" },
+    { href: "/dashboard/analytics", icon: BarChart3, label: "Phân tích" },
+    { href: "/dashboard/downloads", icon: Download, label: "Tải" },
+] as const;
 
 export function MobileBottomNav() {
     const pathname = usePathname();
+
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-14 items-center justify-around border-t border-[#E2E8F0] bg-white sm:hidden">
-            {NAV_ITEMS.map(({ href, icon, label }) => {
+        <nav
+            className="fixed inset-x-0 bottom-0 z-50 grid h-16 grid-cols-5 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden"
+            aria-label="Điều hướng di động"
+        >
+            {navItems.map((item) => {
                 const active =
-                    href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
+                    item.href === "/dashboard"
+                        ? pathname === "/dashboard"
+                        : pathname.startsWith(item.href);
+
                 return (
-                    <a
-                        key={href}
-                        href={href}
+                    <Link
+                        key={item.href}
+                        href={item.href}
+                        aria-current={active ? "page" : undefined}
                         className={cn(
-                            "flex flex-col items-center gap-0.5 px-3 py-1 transition-opacity",
-                            active ? "opacity-100" : "opacity-50"
+                            "flex min-h-12 flex-col items-center justify-center gap-1 text-[10px] font-medium",
+                            active ? "text-brand" : "text-subtle"
                         )}
                     >
-                        <span className="text-lg leading-none">{icon}</span>
-                        <span
-                            className={cn(
-                                "text-[9px] font-medium",
-                                active ? "text-[#FD3E06]" : "text-[#64748B]"
-                            )}
-                        >
-                            {label}
-                        </span>
-                    </a>
+                        <item.icon className="size-[18px]" />
+                        <span>{item.label}</span>
+                    </Link>
                 );
             })}
         </nav>

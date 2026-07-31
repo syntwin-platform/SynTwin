@@ -3,14 +3,13 @@
 import Link from "next/link";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
 import { useSession } from "@/hooks/useSession";
+import { getDefaultDestination } from "@/lib/access-policy";
 
 export default function NotFound() {
   const session = useSession();
-  const returnPath = session?.isAdmin
-    ? "/admin/dashboard"
-    : session?.plan === "unpaid"
-      ? "/pricing"
-      : "/dashboard";
+  const returnPath = session
+    ? getDefaultDestination(session)
+    : "/";
 
   return (
     <div className="flex h-[100dvh] w-screen flex-col items-center justify-center bg-[#F9FAFA] p-6 text-center">
@@ -21,17 +20,18 @@ export default function NotFound() {
         404
       </h1>
       <h2 className="mb-4 text-2xl font-semibold text-[#334155]">
-        Sector Not Found
+        Không tìm thấy trang
       </h2>
       <p className="mb-8 max-w-md text-[#64748B]">
-        The digital twin sector you are looking for has been moved, deleted, or does not exist. Please check the URL or return to the main dashboard.
+        Đường dẫn bạn mở không tồn tại hoặc đã được di chuyển. Hãy kiểm tra
+        lại địa chỉ hoặc quay về khu vực phù hợp với tài khoản.
       </p>
       <Link
         href={returnPath}
         className="flex items-center gap-2 rounded-lg bg-[#0F172A] px-6 py-3 font-medium text-white transition-colors hover:bg-[#334155]"
       >
         <ArrowLeft className="h-4 w-4" />
-        Return to Dashboard
+        Quay lại
       </Link>
     </div>
   );

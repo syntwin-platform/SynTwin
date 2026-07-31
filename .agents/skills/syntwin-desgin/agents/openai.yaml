@@ -1,0 +1,4 @@
+interface:
+  display_name: "SynTwin Design System"
+  short_description: "Design professional industrial SynTwin interfaces"
+  default_prompt: "Use $syntwin-desgin to redesign a SynTwin interface while preserving product behavior and brand consistency."
