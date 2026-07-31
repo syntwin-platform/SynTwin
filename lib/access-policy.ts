@@ -38,6 +38,20 @@ export function isPaidCustomer(
     );
 }
 
+export function getDashboardHref(
+    session: AccessSession | null | undefined
+): string {
+    if (isAdmin(session)) {
+        return "/admin/dashboard";
+    }
+
+    if (isPaidCustomer(session)) {
+        return "/dashboard";
+    }
+
+    return "/dashboard/demo";
+}
+
 export function getDefaultDestination(
     session: AccessSession | null | undefined
 ): string {
@@ -46,7 +60,7 @@ export function getDefaultDestination(
     }
 
     if (isFreeCustomer(session)) {
-        return "/dashboard/demo";
+        return "/";
     }
 
     if (isPaidCustomer(session)) {
@@ -76,16 +90,12 @@ export function evaluateRouteAccess(
     }
 
     if (pathname === "/dashboard/demo") {
-        if (!session) {
-            return redirectToLogin(pathnameWithSearch);
-        }
-
-        return isFreeCustomer(session) || isAdmin(session)
-            ? { allowed: true }
-            : {
+        return isPaidCustomer(session)
+            ? {
                   allowed: false,
                   redirectTo: getDefaultDestination(session),
-              };
+              }
+            : { allowed: true };
     }
 
     if (

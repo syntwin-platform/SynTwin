@@ -6,8 +6,11 @@ import { BrandMark } from "@/components/shared/BrandMark";
 import { useSession } from "@/hooks/useSession";
 import { logoutUser } from "@/lib/api/auth";
 
+import { getDashboardHref } from "@/lib/access-policy";
+
 export function SiteHeader() {
     const session = useSession();
+    const dashboardHref = getDashboardHref(session);
 
     const handleLogout = () => {
         void logoutUser();
@@ -25,16 +28,15 @@ export function SiteHeader() {
                     <Link href="/pricing" className="text-sm text-steel hover:text-ink">Bảng giá</Link>
                 </nav>
                 <div className="flex items-center gap-1 sm:gap-2">
+                    <Link href={dashboardHref} className="inline-flex min-h-11 items-center gap-2 px-3 text-sm font-medium text-steel hover:text-brand">
+                        <LayoutDashboard className="size-4" aria-hidden="true" />
+                        Bảng điều khiển
+                    </Link>
+
                     {session ? (
-                        <>
-                            <Link href="/dashboard" className="hidden min-h-11 items-center gap-2 px-3 text-sm font-medium text-steel hover:text-brand sm:inline-flex">
-                                <LayoutDashboard className="size-4" aria-hidden="true" />
-                                Bảng điều khiển
-                            </Link>
-                            <button onClick={handleLogout} className="inline-flex min-h-11 items-center gap-2 rounded-md bg-canvas px-3 text-sm font-medium text-steel border border-line hover:text-ink sm:px-4">
-                                Đăng xuất <LogOut className="size-4" aria-hidden="true" />
-                            </button>
-                        </>
+                        <button onClick={handleLogout} className="inline-flex min-h-11 items-center gap-2 rounded-md bg-canvas px-3 text-sm font-medium text-steel border border-line hover:text-ink sm:px-4">
+                            Đăng xuất <LogOut className="size-4" aria-hidden="true" />
+                        </button>
                     ) : (
                         <>
                             <Link href="/login" className="hidden min-h-11 items-center px-3 text-sm font-medium text-steel hover:text-brand sm:inline-flex">Đăng nhập</Link>

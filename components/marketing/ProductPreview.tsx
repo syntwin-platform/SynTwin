@@ -58,7 +58,7 @@ export function ProductPreview() {
                             Ví dụ mô phỏng
                         </span>
                     </div>
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto" tabIndex={0} aria-label="Bảng danh sách robot nhà máy mẫu">
                         <table className="w-full table-fixed text-left text-[11px] sm:text-sm">
                             <thead>
                                 <tr>

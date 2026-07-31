@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, CircleCheck, PlayCircle } from "lucide-react";
+import { CircleCheck, LayoutDashboard, PlayCircle } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { useSession } from "@/hooks/useSession";
+import { getDashboardHref } from "@/lib/access-policy";
 
 const BARS = [46, 54, 49, 62, 58, 68, 61, 57, 64, 60, 66, 63];
 const CHECKLIST = [
@@ -20,6 +22,8 @@ const KPI = [
 export function LandingHero() {
     const textRef = useScrollReveal<HTMLDivElement>({ threshold: 0.1, once: true });
     const cardRef = useScrollReveal<HTMLDivElement>({ threshold: 0.1, once: true });
+    const session = useSession();
+    const dashboardHref = getDashboardHref(session);
 
     return (
         <section className="relative overflow-hidden border-b border-line">
@@ -44,10 +48,10 @@ export function LandingHero() {
 
                     <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                         <Link
-                            href="/register"
+                            href={dashboardHref}
                             className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-brand px-5 text-sm font-semibold text-white transition hover:bg-brand-hover hover:shadow-lg hover:shadow-brand/20 active:scale-[0.98]"
                         >
-                            Tạo tài khoản Free <ArrowRight className="size-4" />
+                            <LayoutDashboard className="size-4" /> Bảng điều khiển
                         </Link>
                         <Link
                             href="/pricing"

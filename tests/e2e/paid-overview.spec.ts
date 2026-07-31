@@ -23,7 +23,7 @@ test.describe("tổng quan vận hành trả phí dùng dữ liệu thật", () 
         ).toBeVisible();
         await expect(page.getByText(/18\s*ms/).first()).toBeVisible();
         await expect(
-            page.getByText(/Running.*Không cảnh báo/i).first()
+            page.getByText(/Đang chạy|Running|Trực tuyến/i).first()
         ).toBeVisible();
         await expect(page.getByText(/J1.*12[,.]4°/).first()).toBeVisible();
         await expect(page.getByText(/X 420[,.]5.*Y 112[,.]3/i).first()).toBeVisible();

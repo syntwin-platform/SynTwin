@@ -1,7 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { FlaskConical } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { FlaskConical, LogOut } from "lucide-react";
+import { clearSession } from "@/lib/auth";
 import {
     Area,
     AreaChart,
@@ -29,6 +32,8 @@ import {
 } from "@/lib/demo/selectors";
 
 export function DemoDashboard() {
+    const router = useRouter();
+    const [loggingOut, setLoggingOut] = useState(false);
     const summary = selectDemoFleetSummary(DEMO_DATA);
     const comparison = selectDemoRobotComparison(DEMO_DATA);
     const alertCounts = DEMO_DATA.alerts.reduce(
@@ -38,6 +43,13 @@ export function DemoDashboard() {
         }),
         {} as Record<string, number>
     );
+
+    async function handleLogout(): Promise<void> {
+        if (loggingOut) return;
+        setLoggingOut(true);
+        clearSession();
+        router.replace("/login");
+    }
 
     return (
         <main className="min-h-screen bg-canvas pb-20">
@@ -62,6 +74,16 @@ export function DemoDashboard() {
                         >
                             Nâng cấp
                         </Link>
+                        <button
+                            type="button"
+                            onClick={() => void handleLogout()}
+                            disabled={loggingOut}
+                            aria-label="Đăng xuất"
+                            className="flex min-h-10 items-center gap-1.5 rounded-md border border-line bg-surface px-3 text-sm font-medium text-subtle transition hover:border-danger/30 hover:text-danger disabled:cursor-wait disabled:opacity-50"
+                        >
+                            <LogOut className="size-4" />
+                            <span className="hidden sm:inline">Đăng xuất</span>
+                        </button>
                     </div>
                 </div>
             </header>

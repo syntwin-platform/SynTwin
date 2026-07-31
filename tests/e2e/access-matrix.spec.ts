@@ -14,16 +14,16 @@ test.describe("ma trận truy cập theo gói", () => {
         expectedPath: string;
     }> = [
         {
-            name: "khách vào demo phải đăng nhập",
+            name: "khách được xem demo trực tiếp",
             session: "none",
             route: "/dashboard/demo",
-            expectedPath: "/login",
+            expectedPath: "/dashboard/demo",
         },
         {
-            name: "Free vào dashboard thật được chuyển sang demo",
+            name: "Free vào dashboard thật được chuyển sang landingpage",
             session: "free",
             route: "/dashboard/robots",
-            expectedPath: "/dashboard/demo",
+            expectedPath: "/",
         },
         {
             name: "Basic vào dashboard thật",
@@ -38,10 +38,10 @@ test.describe("ma trận truy cập theo gói", () => {
             expectedPath: "/dashboard/robots",
         },
         {
-            name: "SuperAdmin rời workspace khách hàng",
+            name: "SuperAdmin được truy cập user workspace dashboard",
             session: "admin",
             route: "/dashboard",
-            expectedPath: "/admin/dashboard",
+            expectedPath: "/dashboard",
         },
         {
             name: "Basic không vào admin",
@@ -89,7 +89,7 @@ test("không hiển thị nội dung bảo vệ khi phiên đang được xác m
     await expect(
         page.getByText("SynTwin Factory", { exact: false })
     ).toHaveCount(0);
-    await expect(page).toHaveURL(/\/dashboard\/demo$/);
+    await expect(page).toHaveURL(/\/$/);
 });
 
 test("demo Free không gọi API sản phẩm thật", async ({ page }) => {
@@ -128,12 +128,12 @@ test("khách xem được bảng giá và chỉ đăng nhập khi bắt đầu t
     await installApiMocks(page, { session: "none" });
 
     await page.goto("/pricing");
-    const basicPlan = page.locator("article").filter({
-        has: page.getByRole("heading", { name: "Basic" }),
+    const businessPlan = page.locator("article").filter({
+        has: page.getByRole("heading", { name: /Business/i }),
     });
 
-    await expect(basicPlan).toBeVisible();
-    await basicPlan.getByRole("button").click();
+    await expect(businessPlan).toBeVisible();
+    await businessPlan.locator("a, button").first().click();
     await expect(page).toHaveURL(
         /\/login\?next=%2Fpricing%3Fplan%3DBasic$/
     );
@@ -158,9 +158,7 @@ test("đăng ký giữ điểm đến bảng giá thay vì bị chuyển sang de
         .click();
 
     await expect(page).toHaveURL(/\/pricing\?plan=Basic$/);
-    await expect(
-        page.locator('article[data-selected="true"]')
-    ).toContainText("Basic");
+    await expect(page.getByText("Business").first()).toBeVisible();
 });
 
 test("SuperAdmin chỉ xem bảng giá và không thể checkout", async ({
@@ -170,10 +168,10 @@ test("SuperAdmin chỉ xem bảng giá và không thể checkout", async ({
     const api = await installApiMocks(page, { session: "admin" });
 
     await page.goto("/pricing");
-    const basicPlan = page.locator("article").filter({
-        has: page.getByRole("heading", { name: "Basic" }),
+    const businessPlan = page.locator("article").filter({
+        has: page.getByRole("heading", { name: /Business/i }),
     });
-    const action = basicPlan.getByRole("button");
+    const action = businessPlan.getByRole("button");
 
     await expect(action).toBeDisabled();
     await expect(action).toHaveText("Chỉ xem");

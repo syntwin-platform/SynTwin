@@ -22,7 +22,7 @@ const plans = [
     },
     {
         code: "Business",
-        name: "Business (SME Target)",
+        name: "Business",
         price: "15.000.000 ₫",
         period: "/ tháng",
         robots: "Tối đa 20 robot",
@@ -35,7 +35,7 @@ const plans = [
             "Hỗ trợ kỹ thuật ưu tiên",
         ],
         highlight: true,
-        badge: "Khuyên dùng (SME Target)",
+        badge: "Khuyên dùng",
     },
     {
         code: "Enterprise",
@@ -168,7 +168,7 @@ export function PlanPreview() {
                             Bảng tóm tắt gói dịch vụ (Summary Table)
                         </h3>
                     </div>
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto" tabIndex={0} aria-label="Bảng tóm tắt gói dịch vụ">
                         <table className="w-full text-left text-sm">
                             <thead>
                                 <tr className="border-b border-line bg-[#0F172A] text-white">
@@ -185,7 +185,7 @@ export function PlanPreview() {
                                 </tr>
                                 <tr className="bg-amber-50/60 transition hover:bg-amber-50">
                                     <td className="px-6 py-4 font-semibold text-ink flex items-center gap-2">
-                                        Business (SME Target)
+                                        Business
                                         <span className="rounded bg-amber-200 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-900">
                                             Target
                                         </span>

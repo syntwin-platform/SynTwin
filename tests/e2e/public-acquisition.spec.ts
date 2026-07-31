@@ -108,7 +108,7 @@ test.describe("xác thực và bàn giao gói đã chọn", () => {
         await expect(page).toHaveURL(/\/pricing\?plan=Basic$/);
         await expect(
             page.locator('article[data-selected="true"]')
-        ).toContainText("Basic");
+        ).toContainText("Business");
         expect(
             requestsFor(api.requests, "/api/auth/login", "POST")
         ).toHaveLength(1);
@@ -155,7 +155,7 @@ test.describe("xác thực và bàn giao gói đã chọn", () => {
         );
         await expect(
             page.locator('article[data-selected="true"]')
-        ).toContainText("Premium");
+        ).toContainText("Enterprise");
         expect(
             requestsFor(
                 api.requests,
@@ -212,7 +212,7 @@ test.describe("xác thực và bàn giao gói đã chọn", () => {
         );
         await expect(
             page.locator('article[data-selected="true"]')
-        ).toContainText("Premium");
+        ).toContainText("Enterprise");
 
         const registerRequest = requestsFor(
             api.requests,
@@ -247,7 +247,7 @@ test.describe("bảng giá và checkout", () => {
             requestsFor(api.requests, "/api/auth/me")
         ).toHaveLength(0);
 
-        await basicPlan.getByRole("button").click();
+        await basicPlan.locator("a, button").first().click();
         await expect(page).toHaveURL(/\/login\?next=/);
         const destination = new URL(page.url());
         expect(destination.pathname).toBe("/login");
@@ -315,7 +315,7 @@ test.describe("kết quả VNPay", () => {
             status: "Paid" as const,
             heading: /thanh toán thành công/i,
             displayStatus: "Đã thanh toán",
-            action: /vào bảng điều khiển/i,
+            action: /vào (bảng điều khiển|dashboard)/i,
         },
         {
             status: "Pending" as const,
@@ -463,9 +463,15 @@ test.describe("tiếng Việt và responsive acquisition", () => {
     });
 });
 
-function planCard(page: Page, name: "Basic" | "Premium") {
+function planCard(page: Page, name: string) {
+    const targetName =
+        name === "Basic"
+            ? /Business/i
+            : name === "Premium"
+              ? /Enterprise/i
+              : new RegExp(name, "i");
     return page.locator("article").filter({
-        has: page.getByRole("heading", { name }),
+        has: page.getByRole("heading", { name: targetName }),
     });
 }
 

@@ -6,7 +6,7 @@ import {
     AlertTriangle,
     BarChart3,
     Bot,
-    Download,
+    Building2,
     LayoutDashboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -16,7 +16,7 @@ const navItems = [
     { href: "/dashboard/robots", icon: Bot, label: "Robot" },
     { href: "/dashboard/alerts", icon: AlertTriangle, label: "Cảnh báo" },
     { href: "/dashboard/analytics", icon: BarChart3, label: "Phân tích" },
-    { href: "/dashboard/downloads", icon: Download, label: "Tải" },
+    { href: "/dashboard/company", icon: Building2, label: "Công ty" },
 ] as const;
 
 export function MobileBottomNav() {

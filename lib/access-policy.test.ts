@@ -34,7 +34,7 @@ describe("subscription predicates", () => {
 describe("getDefaultDestination", () => {
     it.each([
         ["anonymous", null, "/login"],
-        ["Free", free, "/dashboard/demo"],
+        ["Free", free, "/"],
         ["Basic", basic, "/dashboard"],
         ["Premium", premium, "/dashboard"],
         ["SuperAdmin", admin, "/admin/dashboard"],
@@ -45,11 +45,11 @@ describe("getDefaultDestination", () => {
 
 describe("evaluateRouteAccess", () => {
     it.each([
-        ["/dashboard/demo", null, denied("/login?next=%2Fdashboard%2Fdemo")],
+        ["/dashboard/demo", null, allowed()],
         ["/dashboard/demo", free, allowed()],
         ["/dashboard/demo", basic, denied("/dashboard")],
         ["/dashboard/demo", premium, denied("/dashboard")],
-        ["/dashboard/demo", admin, denied("/admin/dashboard")],
+        ["/dashboard/demo", admin, allowed()],
         [
             "/dashboard/robots?status=online",
             null,
@@ -57,17 +57,17 @@ describe("evaluateRouteAccess", () => {
                 "/login?next=%2Fdashboard%2Frobots%3Fstatus%3Donline"
             ),
         ],
-        ["/dashboard", free, denied("/dashboard/demo")],
-        ["/dashboard/robots", free, denied("/dashboard/demo")],
+        ["/dashboard", free, denied("/")],
+        ["/dashboard/robots", free, denied("/")],
         ["/dashboard", basic, allowed()],
         ["/dashboard/robots", premium, allowed()],
-        ["/dashboard", admin, denied("/admin/dashboard")],
+        ["/dashboard", admin, allowed()],
         [
             "/admin/users?page=2",
             null,
             denied("/login?next=%2Fadmin%2Fusers%3Fpage%3D2"),
         ],
-        ["/admin/dashboard", free, denied("/dashboard/demo")],
+        ["/admin/dashboard", free, denied("/")],
         ["/admin/users", basic, denied("/dashboard")],
         ["/admin/companies", premium, denied("/dashboard")],
         ["/admin/dashboard", admin, allowed()],
@@ -78,7 +78,7 @@ describe("evaluateRouteAccess", () => {
         ["/pricing", admin, allowed()],
         ["/login", null, allowed()],
         ["/register", null, allowed()],
-        ["/login", free, denied("/dashboard/demo")],
+        ["/login", free, denied("/")],
         ["/register", basic, denied("/dashboard")],
         ["/login", premium, denied("/dashboard")],
         ["/register", admin, denied("/admin/dashboard")],
@@ -128,13 +128,13 @@ describe("getPostLoginDestination", () => {
                 free,
                 "https://evil.example/dashboard"
             )
-        ).toBe("/dashboard/demo");
+        ).toBe("/");
         expect(
             getPostLoginDestination(
                 free,
                 "/dashboard/robots"
             )
-        ).toBe("/dashboard/demo");
+        ).toBe("/");
     });
 });
 
