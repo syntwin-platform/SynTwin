@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { LogOut, UserRound } from "lucide-react";
+import { LogOut, ShieldCheck, UserRound } from "lucide-react";
 import { CompanySwitcher } from "@/components/CompanySwitcher";
 import { logoutUser } from "@/lib/api/auth";
 import type { Session } from "@/lib/auth";
@@ -13,15 +12,12 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ session }: DashboardHeaderProps) {
-    const router = useRouter();
     const [loggingOut, setLoggingOut] = useState(false);
 
     async function handleLogout(): Promise<void> {
         if (loggingOut) return;
         setLoggingOut(true);
         await logoutUser();
-        router.replace("/login");
-        router.refresh();
     }
 
     return (
@@ -31,16 +27,26 @@ export function DashboardHeader({ session }: DashboardHeaderProps) {
             </div>
             {session && (
                 <div className="ml-3 flex shrink-0 items-center gap-2 border-l border-line pl-3">
+                    {session.isAdmin && (
+                        <Link
+                            href="/admin/dashboard"
+                            className="hidden sm:inline-flex items-center gap-1.5 rounded-md border border-brand/30 bg-brand-soft px-2.5 py-1 text-xs font-semibold text-brand transition hover:bg-brand/10"
+                        >
+                            <ShieldCheck className="size-3.5" />
+                            <span>Khu vực Admin</span>
+                        </Link>
+                    )}
+
                     <div className="hidden text-right md:block">
                         <p className="max-w-44 truncate text-xs font-semibold text-ink">
                             {session.name || session.email}
                         </p>
                         <p className="mt-0.5 font-telemetry text-[10px] uppercase tracking-[.12em] text-subtle">
-                            Gói {session.subscriptionPlan}
+                            {session.isAdmin ? "SuperAdmin" : `Gói ${session.subscriptionPlan}`}
                         </p>
                     </div>
                     <Link
-                        href={session.isAdmin ? "/admin/dashboard" : "/dashboard/user"}
+                        href="/dashboard/user"
                         aria-label="Mở tài khoản"
                         className="inline-flex size-10 items-center justify-center rounded-md border border-line bg-canvas text-steel hover:border-brand/40 hover:text-brand"
                     >

@@ -102,23 +102,25 @@ export async function restoreSession(): Promise<Session> {
 }
 
 export async function logoutUser(): Promise<void> {
-    try {
-        await getCurrentUser();
+    const refreshToken = getSession()?.refreshToken;
 
-        const refreshToken = getSession()?.refreshToken;
+    // 1. Clear session immediately to guarantee UI never freezes or hangs
+    clearSession();
 
-        if (!refreshToken) {
-            return;
-        }
-
-        await apiRequest<void>("/api/auth/logout", {
+    // 2. Notify backend in background if token exists
+    if (refreshToken) {
+        void apiRequest<void>("/api/auth/logout", {
             method: "POST",
+            authenticated: false,
             body: JSON.stringify({ refreshToken }),
+        }).catch(() => {
+            // Ignore backend errors during logout
         });
-    } catch {
-        // Local logout must still finish if the Backend is unavailable.
-    } finally {
-        clearSession();
+    }
+
+    // 3. Force clean browser redirect to login
+    if (typeof window !== "undefined") {
+        window.location.href = "/login";
     }
 }
 

@@ -2,13 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShieldCheck } from "lucide-react";
+import { LayoutDashboard, ShieldCheck } from "lucide-react";
 import { adminNavItems } from "@/components/navigation/admin-nav";
 import { BrandMark } from "@/components/shared/BrandMark";
 import { cn } from "@/lib/utils";
 
 export function AdminSidebar() {
     const pathname = usePathname();
+
+    const navItems = [
+        ...adminNavItems,
+        { icon: LayoutDashboard, label: "Vào User Dashboard", href: "/dashboard" },
+    ];
+
     return (
         <aside className="flex h-full w-16 flex-col border-r border-line bg-surface py-4 lg:w-60">
             <BrandMark href="/admin/dashboard" compact className="mx-auto mb-7 lg:hidden" />
@@ -18,10 +24,23 @@ export function AdminSidebar() {
                 <span className="font-telemetry text-[10px] font-semibold uppercase tracking-[.14em] text-brand">Quản trị nền tảng</span>
             </div>
             <nav className="flex flex-1 flex-col gap-1 px-2" aria-label="Điều hướng quản trị">
-                {adminNavItems.map((item) => {
-                    const active = pathname.startsWith(item.href);
+                {navItems.map((item) => {
+                    const active = pathname.startsWith(item.href) && item.href !== "/dashboard";
                     return (
-                        <Link key={item.href} href={item.href} title={item.label} aria-current={active ? "page" : undefined} className={cn("relative flex min-h-11 items-center justify-center gap-3 rounded-md px-3 text-sm font-medium lg:justify-start", active ? "bg-brand-soft text-brand" : "text-steel hover:bg-canvas hover:text-ink")}>
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            title={item.label}
+                            aria-current={active ? "page" : undefined}
+                            className={cn(
+                                "relative flex min-h-11 items-center justify-center gap-3 rounded-md px-3 text-sm font-medium lg:justify-start transition-colors",
+                                active
+                                    ? "bg-brand-soft text-brand"
+                                    : item.href === "/dashboard"
+                                      ? "text-brand hover:bg-brand-soft mt-auto border-t border-line pt-2"
+                                      : "text-steel hover:bg-canvas hover:text-ink"
+                            )}
+                        >
                             {active && <span className="absolute inset-y-2 left-0 w-0.5 bg-brand" />}
                             <item.icon className="size-[18px]" />
                             <span className="hidden lg:block">{item.label}</span>

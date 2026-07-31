@@ -4,16 +4,13 @@ import Link from "next/link";
 import { ArrowRight, LogOut, LayoutDashboard } from "lucide-react";
 import { BrandMark } from "@/components/shared/BrandMark";
 import { useSession } from "@/hooks/useSession";
-import { clearSession } from "@/lib/auth";
-import { useRouter } from "next/navigation";
+import { logoutUser } from "@/lib/api/auth";
 
 export function SiteHeader() {
     const session = useSession();
-    const router = useRouter();
 
     const handleLogout = () => {
-        clearSession();
-        router.refresh();
+        void logoutUser();
     };
 
     return (

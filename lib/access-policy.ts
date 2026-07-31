@@ -80,7 +80,7 @@ export function evaluateRouteAccess(
             return redirectToLogin(pathnameWithSearch);
         }
 
-        return isFreeCustomer(session)
+        return isFreeCustomer(session) || isAdmin(session)
             ? { allowed: true }
             : {
                   allowed: false,
@@ -96,7 +96,7 @@ export function evaluateRouteAccess(
             return redirectToLogin(pathnameWithSearch);
         }
 
-        return isPaidCustomer(session)
+        return isPaidCustomer(session) || isAdmin(session)
             ? { allowed: true }
             : {
                   allowed: false,

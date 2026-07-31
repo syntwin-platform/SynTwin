@@ -58,11 +58,7 @@ export default function UserProfilePage() {
     const [success, setSuccess] = useState("");
 
     useEffect(() => {
-        if (session?.isAdmin) router.replace("/admin/dashboard");
-    }, [router, session?.isAdmin]);
-
-    useEffect(() => {
-        if (!session || session.isAdmin) return;
+        if (!session) return;
         let cancelled = false;
         const timer = window.setTimeout(() => {
             void Promise.all([

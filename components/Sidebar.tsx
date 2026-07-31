@@ -9,12 +9,14 @@ import {
     Building2,
     Download,
     LayoutDashboard,
+    ShieldCheck,
     UserRound,
 } from "lucide-react";
 import { BrandMark } from "@/components/shared/BrandMark";
+import { useSession } from "@/hooks/useSession";
 import { cn } from "@/lib/utils";
 
-const navItems = [
+const baseNavItems = [
     { icon: LayoutDashboard, label: "Tổng quan", href: "/dashboard" },
     { icon: Bot, label: "Robot", href: "/dashboard/robots" },
     { icon: AlertTriangle, label: "Cảnh báo", href: "/dashboard/alerts" },
@@ -26,6 +28,14 @@ const navItems = [
 
 export function Sidebar() {
     const pathname = usePathname();
+    const session = useSession();
+
+    const navItems = session?.isAdmin
+        ? [
+              ...baseNavItems,
+              { icon: ShieldCheck, label: "Quản trị Admin", href: "/admin/dashboard" },
+          ]
+        : baseNavItems;
 
     return (
         <aside className="flex h-full w-16 flex-col border-r border-line bg-surface py-4 lg:w-60">
@@ -58,7 +68,9 @@ export function Sidebar() {
                                 "group relative flex min-h-11 items-center justify-center gap-3 rounded-md px-3 text-sm font-medium transition-colors lg:justify-start",
                                 active
                                     ? "bg-brand-soft text-brand"
-                                    : "text-steel hover:bg-canvas hover:text-ink"
+                                    : item.href === "/admin/dashboard"
+                                      ? "text-brand hover:bg-brand-soft"
+                                      : "text-steel hover:bg-canvas hover:text-ink"
                             )}
                         >
                             {active && (

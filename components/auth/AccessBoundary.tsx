@@ -63,7 +63,7 @@ export function AccessBoundary({
         }
 
         if (mode === "paid") {
-            if (isPaidCustomer(session)) {
+            if (isPaidCustomer(session) || isAdmin(session)) {
                 return { allowed: true };
             }
 
