@@ -10,19 +10,7 @@ const FILENAMES = [
 ];
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader?.startsWith("Bearer ")
-        ? authHeader.slice(7)
-        : null;
-
-    if (!token) {
-        return NextResponse.json(
-            { error: "Cần đăng nhập để tải phần mềm." },
-            { status: 401 }
-        );
-    }
-
-    // Kiểm tra nếu có file local thì stream file local
+    // 1. Nếu có file local trong public/downloads, stream trực tiếp cho trình duyệt
     for (const filename of FILENAMES) {
         const filePath = path.join(process.cwd(), "public", "downloads", filename);
         if (fs.existsSync(filePath)) {
@@ -41,6 +29,17 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         }
     }
 
-    // Nếu không có file local, redirect đến Cloud Storage URL
-    return NextResponse.redirect(FAIROBOT_DOWNLOAD_URL, 302);
+    // 2. Nếu không có file local, kiểm tra Authorization header nếu cần
+    const authHeader = request.headers.get("authorization");
+    const token = authHeader?.startsWith("Bearer ")
+        ? authHeader.slice(7)
+        : null;
+
+    if (!token && !request.cookies.has("token")) {
+        return NextResponse.redirect(new URL("/download/fairobot", request.url));
+    }
+
+    // 3. Chuyển hướng đến URL tải mặc định
+    return NextResponse.redirect(new URL(FAIROBOT_DOWNLOAD_URL, request.url));
 }
+
