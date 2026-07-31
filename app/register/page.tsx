@@ -54,10 +54,7 @@ export default function RegisterPage() {
             setSuccess(true);
             window.setTimeout(() => {
                 const plan = new URLSearchParams(window.location.search).get("plan");
-                const target =
-                    plan === "Basic" || plan === "Premium"
-                        ? `/pricing?plan=${plan}`
-                        : "/pricing";
+                const target = plan ? `/pricing?plan=${encodeURIComponent(plan)}` : "/pricing";
                 if (!storeAuthResponse(auth, false)) {
                     setSuccess(false);
                     setError("Phản hồi đăng ký từ backend không hợp lệ.");

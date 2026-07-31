@@ -37,10 +37,39 @@ export default function DashboardOverviewPage() {
         commands: RobotCommand[] | null;
         error: string;
     }>({ robotId: "", history: null, commands: null, error: "" });
-    const history =
+    const selectedSnapshot = fleet.items.find(
+        ({ robot }) => robot.id === selectedRobot?.id
+    ) ?? fleet.items[0];
+    const rawHistory =
         robotContext.robotId === selectedRobot?.id
             ? robotContext.history
             : null;
+    const history = (() => {
+        if (!rawHistory || rawHistory.length === 0) {
+            return rawHistory;
+        }
+
+        if (!selectedSnapshot?.state) return rawHistory;
+        const state = selectedSnapshot.state;
+        const livePoint = {
+            timestamp: state.timestamp || state.lastSeenAt || new Date().toISOString(),
+            jointAngles: state.jointAngles || [],
+            tcpPose: state.tcpPose,
+            sequenceNumber: state.sequenceNumber ?? null,
+            latencyMilliseconds: state.latencyMilliseconds ?? null,
+            temperature: state.temperature ?? null,
+            collisionWarning: state.collisionWarning ?? null,
+            status: state.status ?? null,
+            source: state.source || "LiveStream",
+        };
+
+        const lastTs = rawHistory.at(-1)?.timestamp;
+        if (lastTs === livePoint.timestamp) {
+            return rawHistory;
+        }
+
+        return [...rawHistory, livePoint];
+    })();
     const commands =
         robotContext.robotId === selectedRobot?.id
             ? robotContext.commands

@@ -221,7 +221,7 @@ test.describe("analytics dùng telemetry thật và khai báo phần thiếu", (
         ).toBeVisible();
         await expect(
             page.getByRole("figure", {
-                name: "Nhiệt độ và độ trễ theo thời gian",
+                name: "Lịch sử độ trễ nhận dữ liệu theo thời gian",
             })
         ).toContainText(
             /Nguồn: API lịch sử (đo đạc|telemetry) robot/i

@@ -21,6 +21,7 @@ const adminRoutes = [
     "/admin/dashboard",
     "/admin/users",
     "/admin/companies",
+    "/admin/robots",
 ] as const;
 
 for (const route of publicRoutes) {

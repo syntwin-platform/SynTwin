@@ -93,7 +93,7 @@ test.describe("xác thực và bàn giao gói đã chọn", () => {
         });
 
         await page.goto(
-            "/login?next=%2Fpricing%3Fplan%3DBasic"
+            "/login?next=%2Fpricing%3Fplan%3DBusiness"
         );
         await page.getByLabel(/email/i).fill("owner@syntwin.test");
         await page
@@ -105,7 +105,7 @@ test.describe("xác thực và bàn giao gói đã chọn", () => {
         await expect(passwordSubmit).toHaveText(/đăng nhập/i);
         await passwordSubmit.click();
 
-        await expect(page).toHaveURL(/\/pricing\?plan=Basic$/);
+        await expect(page).toHaveURL(/\/pricing\?plan=Business$/);
         await expect(
             page.locator('article[data-selected="true"]')
         ).toContainText("Business");
@@ -131,7 +131,7 @@ test.describe("xác thực và bàn giao gói đã chọn", () => {
         });
 
         await page.goto(
-            "/login?next=%2Fpricing%3Fplan%3DPremium"
+            "/login?next=%2Fpricing%3Fplan%3DEnterprise"
         );
         await page
             .getByRole("button", { name: /mã (qua )?email/i })
@@ -151,7 +151,7 @@ test.describe("xác thực và bàn giao gói đã chọn", () => {
         await codeSubmit.click();
 
         await expect(page).toHaveURL(
-            /\/pricing\?plan=Premium$/
+            /\/pricing\?plan=Enterprise$/
         );
         await expect(
             page.locator('article[data-selected="true"]')
@@ -187,7 +187,7 @@ test.describe("xác thực và bàn giao gói đã chọn", () => {
             session: "none",
         });
 
-        await page.goto("/register?plan=Premium");
+        await page.goto("/register?plan=Enterprise");
         await page
             .getByLabel(/họ và tên/i)
             .fill("Nguyễn Minh An");
@@ -208,7 +208,7 @@ test.describe("xác thực và bàn giao gói đã chọn", () => {
             .click();
 
         await expect(page).toHaveURL(
-            /\/pricing\?plan=Premium$/
+            /\/pricing\?plan=Enterprise$/
         );
         await expect(
             page.locator('article[data-selected="true"]')
@@ -252,7 +252,7 @@ test.describe("bảng giá và checkout", () => {
         const destination = new URL(page.url());
         expect(destination.pathname).toBe("/login");
         expect(destination.searchParams.get("next")).toBe(
-            "/pricing?plan=Basic"
+            "/pricing?plan=Business"
         );
     });
 
@@ -266,7 +266,7 @@ test.describe("bảng giá và checkout", () => {
                 "/payment/vnpay-return?txnRef=ST-20260731_001",
         });
 
-        await page.goto("/pricing?plan=Premium");
+        await page.goto("/pricing?plan=Enterprise");
         await planCard(page, "Premium")
             .getByRole("button", {
                 name: /thanh toán.*VNPay/i,
@@ -282,7 +282,7 @@ test.describe("bảng giá và checkout", () => {
             "POST"
         )[0];
         expect(checkoutRequest.postDataJSON()).toEqual({
-            subscriptionPlan: "Premium",
+            subscriptionPlan: "Enterprise",
         });
     });
 
