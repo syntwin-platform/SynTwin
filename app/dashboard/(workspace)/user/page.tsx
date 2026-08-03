@@ -19,6 +19,7 @@ import {
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { Sidebar } from "@/components/Sidebar";
+import { FAIROBOT_DOWNLOAD_URL } from "@/lib/constants/downloads";
 import { FeedbackBanner } from "@/components/shared/FeedbackBanner";
 import { restoreSession } from "@/lib/api/auth";
 import {
@@ -213,7 +214,7 @@ export default function UserProfilePage() {
                                     </p>
                                     <div className="mt-4 space-y-2">
                                         <a
-                                            href="https://storage.googleapis.com/syntwin-staging-reso-2026-fairobot-downloads/FaiRobot-Studio-1.0.0-Setup.exe"
+                                            href={FAIROBOT_DOWNLOAD_URL}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-md bg-brand px-4 text-xs font-semibold text-white hover:bg-brand-hover"

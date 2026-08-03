@@ -15,14 +15,14 @@ test.describe("FaiRobot Studio Download & Information Workflows", () => {
         await expect(
             page.getByRole("heading", { name: "FaiRobot Studio", level: 1 })
         ).toBeVisible();
-        await expect(page.getByText("v1.0.0").first()).toBeVisible();
+        await expect(page.getByText("v1.0.2").first()).toBeVisible();
 
         // Direct Cloud Storage download link
         const downloadBtn = page.locator("#btn-download-fairobot-direct");
         await expect(downloadBtn).toBeVisible();
         await expect(downloadBtn).toHaveAttribute(
             "href",
-            /storage\.googleapis\.com\/.*FaiRobot-Studio-1\.0\.0-Setup\.exe/
+            /storage\.googleapis\.com\/.*FaiRobot-Studio.*Setup\.exe/
         );
         await expect(downloadBtn).toHaveAttribute("target", "_blank");
 
@@ -69,7 +69,7 @@ test.describe("FaiRobot Studio Download & Information Workflows", () => {
         await expect(downloadLink).toBeVisible();
         await expect(downloadLink).toHaveAttribute(
             "href",
-            /storage\.googleapis\.com\/.*FaiRobot-Studio-1\.0\.0-Setup\.exe/
+            /storage\.googleapis\.com\/.*FaiRobot-Studio.*Setup\.exe/
         );
 
         // SmartScreen notice card
@@ -104,7 +104,7 @@ test.describe("FaiRobot Studio Download & Information Workflows", () => {
         await expect(downloadBtn).toBeVisible();
         await expect(downloadBtn).toHaveAttribute(
             "href",
-            /storage\.googleapis\.com\/.*FaiRobot-Studio-1\.0\.0-Setup\.exe/
+            /storage\.googleapis\.com\/.*FaiRobot-Studio.*Setup\.exe/
         );
 
         const dashboardBtn = page.getByRole("link", { name: "Vào Dashboard" });
@@ -129,7 +129,7 @@ test.describe("FaiRobot Studio Download & Information Workflows", () => {
         await expect(downloadBtn).toBeVisible();
         await expect(downloadBtn).toHaveAttribute(
             "href",
-            /storage\.googleapis\.com\/.*FaiRobot-Studio-1\.0\.0-Setup\.exe/
+            /storage\.googleapis\.com\/.*FaiRobot-Studio.*Setup\.exe/
         );
     });
 });

@@ -161,7 +161,7 @@ export default function FaiRobotDownloadLandingPage() {
                             {
                                 step: "01",
                                 title: "Tải file bộ cài đặt",
-                                desc: "Nhấn nút Tải phía trên để tải file FaiRobot-Studio-1.0.0-Setup.exe về máy tính.",
+                                desc: "Nhấn nút Tải phía trên để tải file FaiRobot-Studio-Setup.exe về máy tính.",
                             },
                             {
                                 step: "02",

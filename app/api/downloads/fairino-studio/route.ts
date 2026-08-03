@@ -4,9 +4,10 @@ import fs from "fs";
 import { FAIROBOT_DOWNLOAD_URL } from "@/lib/constants/downloads";
 
 const FILENAMES = [
+    "FaiRobot-Studio-Setup.exe",
+    "FaiRobot-Studio-1.0.2-Setup.exe",
     "FaiRobot-Studio-1.0.1-Setup.exe",
-    "FaiRobot-Studio-1.0.0-Setup.exe",
-    "FaiRobot-Studio-Setup.exe"
+    "FaiRobot-Studio-1.0.0-Setup.exe"
 ];
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
