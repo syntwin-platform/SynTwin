@@ -47,11 +47,18 @@ export default function AnalyticsPage() {
         error: string;
     }>({ robotId: "", points: null, error: "" });
 
+    const [streamBuffer, setStreamBuffer] = useState<{
+        robotId: string;
+        points: TelemetryHistoryPoint[];
+    }>({ robotId: "", points: [] });
+
+    const activeRobotId = selectedSnapshot?.robot.id ?? null;
+
     useEffect(() => {
         let cancelled = false;
-        if (!selectedSnapshot) return;
+        if (!activeRobotId) return;
 
-        void getRobotTelemetryHistory(selectedSnapshot.robot.id, {
+        void getRobotTelemetryHistory(activeRobotId, {
             limit: 500,
             fields: [
                 "temperature",
@@ -75,7 +82,7 @@ export default function AnalyticsPage() {
             .then((points) => {
                 if (!cancelled) {
                     setHistoryState({
-                        robotId: selectedSnapshot.robot.id,
+                        robotId: activeRobotId,
                         points,
                         error: "",
                     });
@@ -84,7 +91,7 @@ export default function AnalyticsPage() {
             .catch((error: unknown) => {
                 if (!cancelled) {
                     setHistoryState({
-                        robotId: selectedSnapshot.robot.id,
+                        robotId: activeRobotId,
                         points: null,
                         error:
                             error instanceof Error
@@ -97,14 +104,74 @@ export default function AnalyticsPage() {
         return () => {
             cancelled = true;
         };
-    }, [selectedSnapshot]);
+    }, [activeRobotId]);
+
+    // Append incoming real-time telemetry snapshots without page reloads
+    useEffect(() => {
+        if (!selectedSnapshot?.state || !activeRobotId) return;
+        const state = selectedSnapshot.state;
+
+        const livePoint: TelemetryHistoryPoint = {
+            timestamp: state.timestamp || state.lastSeenAt || new Date().toISOString(),
+            jointAngles: state.jointAngles || [],
+            tcpPose: state.tcpPose,
+            sequenceNumber: state.sequenceNumber ?? null,
+            latencyMilliseconds: state.latencyMilliseconds ?? null,
+            temperature: state.temperature ?? null,
+            collisionWarning: state.collisionWarning ?? null,
+            status: state.status ?? null,
+            source: state.source || "LiveStream",
+        };
+
+        setStreamBuffer((prev) => {
+            if (prev.robotId !== activeRobotId) {
+                return { robotId: activeRobotId, points: [livePoint] };
+            }
+            const lastTs = prev.points.at(-1)?.timestamp;
+            if (lastTs === livePoint.timestamp) {
+                return prev;
+            }
+            const updated = [...prev.points, livePoint].slice(-100);
+            return { robotId: activeRobotId, points: updated };
+        });
+    }, [selectedSnapshot?.state, activeRobotId]);
 
     if (!session) return null;
 
-    const history =
+    const rawHistory =
         historyState.robotId === selectedSnapshot?.robot.id
             ? historyState.points
             : null;
+
+    const livePoints =
+        streamBuffer.robotId === selectedSnapshot?.robot.id
+            ? streamBuffer.points
+            : [];
+
+    const history = (() => {
+        if (livePoints.length > 0) {
+            if (!rawHistory || rawHistory.length === 0) {
+                return livePoints;
+            }
+            const existingTs = new Set(rawHistory.map((p) => p.timestamp));
+            const newLive = livePoints.filter((p) => !existingTs.has(p.timestamp));
+            return [...rawHistory, ...newLive];
+        }
+        return rawHistory;
+    })();
+
+    const validLatencies = (history ?? [])
+        .map((p) => p.latencyMilliseconds)
+        .filter((l): l is number => typeof l === "number" && l >= 0);
+    const avgLatencyMs = validLatencies.length > 0
+        ? Math.round((validLatencies.reduce((a, b) => a + b, 0) / validLatencies.length) * 10) / 10
+        : null;
+
+    const chartData = (history ?? []).map((p) => ({
+        ...p,
+        avgLatencyMs: avgLatencyMs ?? p.latencyMilliseconds,
+    }));
+
     const historyError =
         historyState.robotId === selectedSnapshot?.robot.id
             ? historyState.error
@@ -178,7 +245,7 @@ export default function AnalyticsPage() {
                             <DataState state="empty" title="Chưa có robot để phân tích" description="Đăng ký robot trước khi xem dữ liệu." />
                         ) : (
                             <>
-                                <section className="grid gap-px border border-line bg-line sm:grid-cols-2 xl:grid-cols-4">
+                                <section className="grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-5">
                                     <MetricCell
                                         label="Trạng thái hiện tại"
                                         value={formatRobotStatus(
@@ -197,6 +264,11 @@ export default function AnalyticsPage() {
                                         unit={typeof selectedSnapshot?.state?.latencyMilliseconds === "number" ? "ms" : undefined}
                                     />
                                     <MetricCell
+                                        label="Độ trễ trung bình"
+                                        value={avgLatencyMs ?? "—"}
+                                        unit={typeof avgLatencyMs === "number" ? "ms" : undefined}
+                                    />
+                                    <MetricCell
                                         label="Cảnh báo va chạm"
                                         value={collision.label}
                                         tone={collision.tone}
@@ -205,20 +277,20 @@ export default function AnalyticsPage() {
 
                                 <section className="grid gap-6 xl:grid-cols-[1.3fr_.7fr]">
                                     <ChartPanel
-                                        title="Nhiệt độ và độ trễ theo thời gian"
-                                        description="Lịch sử do hệ thống đo đạc trả về; không nội suy khi thiếu dữ liệu"
-                                        meta={history ? `${history.length} điểm` : "Đang kiểm tra"}
+                                        title="Lịch sử độ trễ nhận dữ liệu theo thời gian"
+                                        description="Lịch sử độ trễ đo đạc tính bằng miligiây (ms); không nội suy khi thiếu dữ liệu"
+                                        meta={chartData ? `${chartData.length} điểm` : "Đang kiểm tra"}
                                     >
-                                        {history && history.length > 0 ? (
-                                            <div className="h-72" role="img" aria-label="Biểu đồ lịch sử nhiệt độ và độ trễ robot">
+                                        {chartData && chartData.length > 0 ? (
+                                            <div className="h-72" role="img" aria-label="Biểu đồ lịch sử độ trễ robot">
                                                 <ResponsiveContainer width="100%" height="100%">
-                                                    <LineChart data={history}>
+                                                    <LineChart data={chartData}>
                                                         <CartesianGrid stroke="#E2E8F0" vertical={false} />
-                                                        <XAxis dataKey="timestamp" tickFormatter={(value) => new Date(value).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })} tick={{ fontSize: 10 }} />
+                                                        <XAxis dataKey="timestamp" tickFormatter={(value) => new Date(value).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })} tick={{ fontSize: 10 }} />
                                                         <YAxis tick={{ fontSize: 10 }} />
                                                         <Tooltip labelFormatter={(value) => new Date(value).toLocaleString("vi-VN")} />
-                                                        <Line isAnimationActive={false} type="monotone" dataKey="temperature" name="Nhiệt độ °C" stroke="#C52F00" connectNulls={false} dot={false} />
                                                         <Line isAnimationActive={false} type="monotone" dataKey="latencyMilliseconds" name="Độ trễ ms" stroke="#2563EB" connectNulls={false} dot={false} />
+                                                        <Line isAnimationActive={false} type="monotone" dataKey="avgLatencyMs" name="Độ trễ trung bình ms" stroke="#059669" strokeDasharray="3 3" connectNulls={false} dot={false} />
                                                     </LineChart>
                                                 </ResponsiveContainer>
                                             </div>

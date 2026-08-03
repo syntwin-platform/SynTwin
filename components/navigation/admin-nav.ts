@@ -1,4 +1,5 @@
 import {
+    Bot,
     Building2,
     LayoutDashboard,
     Users,
@@ -19,5 +20,10 @@ export const adminNavItems = [
         icon: Building2,
         label: "Công ty",
         href: "/admin/companies",
+    },
+    {
+        icon: Bot,
+        label: "Quản lý Robot",
+        href: "/admin/robots",
     },
 ] as const;

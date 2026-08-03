@@ -6,6 +6,7 @@ import {
     mergeFleetState,
     type FleetRobotSnapshot,
 } from "@/lib/operations/fleet-selectors";
+import { signalRTelemetryClient } from "@/lib/realtime/signalr-client";
 
 interface FleetState {
     companyId: string | null;
@@ -36,7 +37,13 @@ export function useFleetSnapshot(companyId: string | null) {
 
     const refresh = useCallback(async () => {
         const requestId = ++requestRef.current;
-        setLoading(true);
+        const isInitialFetch =
+            stateRef.current.companyId !== companyId ||
+            stateRef.current.items.length === 0;
+
+        if (isInitialFetch) {
+            setLoading(true);
+        }
 
         if (!companyId) {
             commit(emptyState);
@@ -98,11 +105,57 @@ export function useFleetSnapshot(companyId: string | null) {
 
     useEffect(() => {
         const timer = window.setTimeout(() => void refresh(), 0);
+        const interval = window.setInterval(() => void refresh(), 4000);
         return () => {
             window.clearTimeout(timer);
+            window.clearInterval(interval);
             requestRef.current += 1;
         };
     }, [refresh]);
+
+    // SignalR Real-Time Telemetry Subscription
+    useEffect(() => {
+        if (!companyId || state.items.length === 0) return;
+
+        const robotIds = state.items.map((item) => item.robot.id);
+        robotIds.forEach((id) => {
+            void signalRTelemetryClient.joinRobotGroup(id);
+        });
+
+        const unsubscribeTelemetry = signalRTelemetryClient.onTelemetryUpdated((newState) => {
+            if (!newState || !newState.robotId) return;
+            const current = stateRef.current;
+            if (current.companyId !== companyId) return;
+
+            const hasRobot = current.items.some((item) => item.robot.id === newState.robotId);
+            if (!hasRobot) return;
+
+            const observedAt = new Date().toISOString();
+            const updatedItems = current.items.map((item) =>
+                item.robot.id === newState.robotId
+                    ? {
+                          ...item,
+                          state: newState,
+                          freshness: "current" as const,
+                          observedAt,
+                      }
+                    : item
+            );
+
+            commit({
+                ...current,
+                items: updatedItems,
+                updatedAt: observedAt,
+            });
+        });
+
+        return () => {
+            unsubscribeTelemetry();
+            robotIds.forEach((id) => {
+                void signalRTelemetryClient.leaveRobotGroup(id);
+            });
+        };
+    }, [companyId, commit, state.items.length]);
 
     const visible =
         state.companyId === companyId
